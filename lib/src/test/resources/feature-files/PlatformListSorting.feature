@@ -2,7 +2,7 @@
 Feature: Platform List Tab
 
     Background: Basic Setup
-        Given A database with many platforms in available.
+        Given A database with many platforms available.
     
     Scenario: Sorting by column
 
