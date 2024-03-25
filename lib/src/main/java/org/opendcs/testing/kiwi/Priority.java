@@ -7,9 +7,11 @@ public class Priority
 {
     private static List<Priority> priorities = new ArrayList<>();;
     
-    public Priority(int id, String name)
-    {
+    public final String name;
 
+    public Priority(String name)
+    {
+        this.name = name;
     }
 
     public Priority fromString(String priorityName)
