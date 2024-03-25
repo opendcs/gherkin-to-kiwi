@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.opendcs.testing.kiwi.TestCase;
+import org.opendcs.testing.rpc.KiwiClient;
 
 import io.cucumber.gherkin.GherkinParser;
 import io.cucumber.messages.types.Envelope;
@@ -90,14 +91,26 @@ public class TestCaseGenerator
         TestCaseGenerator generator = new TestCaseGenerator("Test");
         try
         {
+            KiwiClient client = new KiwiClient("http://localhost", "test", "testpass");
+
             generator.generateCases(path)
                      .forEach(tc ->
-                     {
+                     {  
                         System.out.println(tc.getProduct().name);
                         System.out.println("\tComponents: "+tc.getComponents().stream().map(c->c.name).collect(Collectors.joining(",")));
                         System.out.println("\tSummary:  "+tc.getSummary());
                         System.out.println("\tSteps:"+System.lineSeparator()+tc.getSteps());
+                        try
+                        {
+                            client.writeTestCase(tc);
+                        }
+                        catch (IOException ex)
+                        {
+                            System.out.println("Unable to push case to kiwi.");
+                            ex.printStackTrace();
+                        }
                      });
+
         }
         catch (IOException e)
         {

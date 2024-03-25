@@ -1,6 +1,7 @@
 plugins
 {
-    id 'java-library'    
+    id 'java-library'
+    id 'eclipse'
 }
 
 java
@@ -20,6 +21,8 @@ repositories
 dependencies 
 {
     implementation(libs.gherkin)
+    implementation(libs.json.rpc2)
+    implementation(libs.okhttp)
 }
 
 

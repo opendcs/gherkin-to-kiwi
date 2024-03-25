@@ -3,3 +3,6 @@ build
 gradle.properties
 .gradle
 **/bin
+**/.project
+**/.classpath
+**/.settings
