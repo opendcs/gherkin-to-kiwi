@@ -21,3 +21,12 @@ dependencies
 {
     implementation(libs.gherkin)
 }
+
+
+task run (type: JavaExec)
+{ t ->
+    dependsOn compileJava
+    classpath += sourceSets.main.output
+    classpath += sourceSets.main.runtimeClasspath
+    mainClass = "org.opendcs.testing.TestCaseGenerator"
+}
