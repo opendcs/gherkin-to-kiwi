@@ -1,4 +1,4 @@
-@Component=DbEdit
+@GUI
 Feature: Platform List Tab
 
     Background: Basic Setup
@@ -14,7 +14,7 @@ Feature: Platform List Tab
         Then The selected platform is opened
   
 
-    Scenario Outline: Filters
+    Scenario Outline: Filter by <filter>
 
         Given The user filters the platform list by <filter>
         When The user double clicks a row

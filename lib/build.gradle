@@ -28,5 +28,5 @@ task run (type: JavaExec)
     dependsOn compileJava
     classpath += sourceSets.main.output
     classpath += sourceSets.main.runtimeClasspath
-    mainClass = "org.opendcs.testing.TestCaseGenerator"
+    mainClass = "org.opendcs.testing.gherkin.TestCaseGenerator"
 }
