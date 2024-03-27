@@ -91,7 +91,10 @@ public class TestCaseGenerator
         TestCaseGenerator generator = new TestCaseGenerator("Test");
         try
         {
-            KiwiClient client = new KiwiClient("http://localhost", "test", "testpass");
+            final String url = args[0];
+            final String user = args[1];
+            final String password = args[2];
+            KiwiClient client = new KiwiClient(url, user, password);
 
             generator.generateCases(path)
                      .forEach(tc ->
