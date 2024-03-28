@@ -6,7 +6,9 @@ import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -14,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.rpc.KiwiClient;
+import org.opendcs.testing.rpc.TestCaseRpc;
 
 import io.cucumber.gherkin.GherkinParser;
 import io.cucumber.messages.types.Envelope;
@@ -98,14 +101,22 @@ public class TestCaseGenerator
 
             generator.generateCases(path)
                      .forEach(tc ->
-                     {  
-                        System.out.println(tc.getProduct().name);
-                        System.out.println("\tComponents: "+tc.getComponents().stream().map(c->c.name).collect(Collectors.joining(",")));
-                        System.out.println("\tSummary:  "+tc.getSummary());
-                        System.out.println("\tSteps:"+System.lineSeparator()+tc.getSteps());
+                     {
                         try
                         {
-                            client.writeTestCase(tc);
+                            TestCaseRpc rpc = client.testcase();
+                            Map<String,String> query = new HashMap<>();
+                            query.put("summary", tc.getSummary());
+                            List<TestCase> cases = rpc.filter(query);
+                            if (cases.size() == 0)
+                            {
+                                long id = client.testcase().create(tc);
+                                System.out.println("Created test, id =" + id);
+                            }
+                            else
+                            {
+                                System.out.println("Would update at id =" + cases.get(0).getId());
+                            }
                         }
                         catch (IOException ex)
                         {

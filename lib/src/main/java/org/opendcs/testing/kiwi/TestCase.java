@@ -6,6 +6,7 @@ import java.util.List;
 
 public class TestCase
 {
+    private final long id;
     private final String summary;
     private final String steps;
     private final Priority priority;
@@ -21,12 +22,13 @@ public class TestCase
     private final List<Component> components;
 
 
-    private TestCase(String summary, String steps, Priority priority,
+    private TestCase(long id, String summary, String steps, Priority priority,
                      Product product, Category category, String requirements,
                      String notes, String arguments, String referenceLink,
                      String status, List<Attachment> attachments, List<String> tags,
                      List<Component> components)
     {
+        this.id = id;
         this.summary = summary;
         this.steps = steps;
         this.priority = priority;
@@ -45,6 +47,7 @@ public class TestCase
 
     public static class Builder
     {
+        private long id = -1;
         private List<Attachment> attachments = new ArrayList<>();
         private List<String> tags = new ArrayList<>();
         private List<Component> components = new ArrayList<>();
@@ -67,9 +70,15 @@ public class TestCase
 
         public TestCase build()
         {
-            return new TestCase(summary, steps, priority, product,
+            return new TestCase(id, summary, steps, priority, product,
                                 category, requirements,notes,arguments,referenceLink,status,
                                 attachments, tags, components);
+        }
+
+        public Builder withId(long id)
+        {
+            this.id = id;
+            return this;
         }
 
         public Builder withComponent(String component)
@@ -108,6 +117,19 @@ public class TestCase
             return this;
         }
 
+        public Builder withCategory(String category, String product)
+        {
+            this.category = new Category(product, category);
+            this.product = new Product(product);
+            return this;
+        }
+
+        public Builder withCategory(String category)
+        {
+            this.category = new Category(this.product.name, category);
+            return this;
+        }
+
         public Builder withPriority(String priority)
         {
             this.priority = new Priority(priority);
@@ -120,6 +142,11 @@ public class TestCase
             return this;
         }
 
+    }
+
+    public long getId()
+    {
+        return id;
     }
 
     public String getSummary()

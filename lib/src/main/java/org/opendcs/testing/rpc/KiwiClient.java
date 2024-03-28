@@ -17,6 +17,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.opendcs.testing.kiwi.TestCase;
 
+import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
@@ -100,23 +101,6 @@ public class KiwiClient
         }
     }
 
-    public void writeTestCase(TestCase tc) throws IOException
-    {
-        JSONRPC2Request rpcReq = new JSONRPC2Request("TestCase.create",1);
-        Map<String,Object> params = new HashMap<>();
-        params.put("summary", tc.getSummary());
-        params.put("text", tc.getSteps());
-        rpcReq.setPositionalParams(Arrays.asList(params));
-        //rpcReq.setNamedParams(params);
-        Request req = new Request.Builder()
-                                 .url(baseUrl)
-                                 .post(RequestBody.create(rpcReq.toString(),APPLICATION_JSON))
-                                 .build();
-        Response res = client.newCall(req).execute();       
-        System.out.println("HTTP result: " + res.code());
-        System.out.println(res.body().string());    
-    }
-
     public TestCaseRpc testcase()
     {
         return testCaseRpc;
@@ -143,11 +127,20 @@ public class KiwiClient
         {
             throw new IOException("HTTP Call failed with error " + httpResponse.code());
         }
-        JSONRPC2Response rpcResponse = new JSONRPC2Response(httpResponse.body().string(), request.getID());
-        if (rpcResponse.getError() != null)
+        String body = httpResponse.body().string();
+        JSONRPC2Response rpcResponse;
+        try
         {
-            throw new IOException("RPC call failed", rpcResponse.getError());
+            rpcResponse = JSONRPC2Response.parse(body);
+            if (rpcResponse.getError() != null)
+            {
+                throw new IOException("RPC call failed", rpcResponse.getError());
+            }
+            return rpcResponse;
         }
-        return rpcResponse;
+        catch (JSONRPC2ParseException ex)
+        {
+            throw new IOException("Invalid response from server", ex);
+        }
     }
 }

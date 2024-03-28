@@ -23,6 +23,7 @@ dependencies
     implementation(libs.gherkin)
     implementation(libs.json.rpc2)
     implementation(libs.okhttp)
+    implementation(libs.bundles.fasterxml.json)
 }
 
 
