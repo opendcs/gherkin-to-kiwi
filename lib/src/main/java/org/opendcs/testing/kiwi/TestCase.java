@@ -42,7 +42,11 @@ public class TestCase
         this.attachments = attachments;
         this.tags = tags;
         this.components = components;
-        
+    }
+
+    public Builder newBuilder()
+    {
+        return new Builder(this);
     }
 
     public static class Builder
@@ -66,6 +70,24 @@ public class TestCase
         {
             this.product = new Product(product);
             this.category = new Category(product, "--default--");
+        }
+
+        public Builder(TestCase tc)
+        {
+            this.id = tc.id;
+            this.summary = tc.summary;
+            this.steps = tc.steps;
+            this.priority = tc.priority;
+            this.product = tc.product;
+            this.category = tc.category;
+            this.requirements = tc.requirements;
+            this.notes = tc.notes;
+            this.arguments = tc.arguments;
+            this.referenceLink = tc.referenceLink;
+            this.status = tc. status;
+            this.attachments = new ArrayList<>(attachments);
+            this.tags = new ArrayList<>(tags);
+            this.components = new ArrayList<>(components);
         }
 
         public TestCase build()

@@ -105,12 +105,20 @@ public class TestCaseGenerator
                         try
                         {
                             TestCaseRpc rpc = client.testcase();
+                            String marker = String.format("Marker:%s-%s-%s", tc.getProduct().name, tc.getCategory().name, tc.getSummary());
                             Map<String,String> query = new HashMap<>();
                             query.put("summary", tc.getSummary());
+                            query.put("author__username", user);
+                            query.put("notes__contains", marker);
+                            
                             List<TestCase> cases = rpc.filter(query);
                             if (cases.size() == 0)
                             {
-                                long id = client.testcase().create(tc);
+                                TestCase.Builder builder = tc.newBuilder();
+                                String currentNotes = tc.getNotes();
+                                String newNotes = (currentNotes != null ? currentNotes : "") + "\n" + marker;
+                                builder.withNotes(newNotes);
+                                long id = client.testcase().create(builder.build());
                                 System.out.println("Created test, id =" + id);
                             }
                             else

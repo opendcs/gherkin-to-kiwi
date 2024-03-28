@@ -38,6 +38,7 @@ public class TestCaseRpc
         params.put("case_status", 2);//tc.getStatus());
         params.put("category", 1);//tc.getCategory());
         params.put("priority", 3); //tc.getPriority();
+        params.put("notes", tc.getNotes());
         rpcReq.setPositionalParams(Arrays.asList(params));
         JSONRPC2Response response = client.rpcRequest(rpcReq);
         String jsonString = response.getResult().toString();
