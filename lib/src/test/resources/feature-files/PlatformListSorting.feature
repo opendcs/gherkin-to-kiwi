@@ -16,7 +16,7 @@ Feature: Platform List Tab
 
     Scenario Outline: Filter by <filter>
 
-        Given The user filters the platform list by <filter>
+        Given The user filters the platform list by <filter> selection-dfdf
         When The user double clicks a row
         Then The correct platform is opened
         

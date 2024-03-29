@@ -164,6 +164,12 @@ public class TestCase
             return this;
         }
 
+        public Builder withReferenceLink(String link)
+        {
+            this.referenceLink = link;
+            return this;
+        }
+
     }
 
     public long getId()

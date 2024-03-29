@@ -79,6 +79,9 @@ public class TestCaseGenerator
                             pw.println(String.format("%s: %s", typeName, s.getText()));
                         });
                     }
+                    // TODO: probably need to be able to tweak the URI to something sensible like the project URL vs the local
+                    // FileSystem. Or just Strip to not include the host.                    
+                    testBuilder.withReferenceLink(p.getUri());
                     testBuilder.withSteps(sw.toString());
                     kiwiCases.add(testBuilder.build());
                 });
@@ -105,25 +108,21 @@ public class TestCaseGenerator
                         try
                         {
                             TestCaseRpc rpc = client.testcase();
-                            String marker = String.format("Marker:%s-%s-%s", tc.getProduct().name, tc.getCategory().name, tc.getSummary());
                             Map<String,String> query = new HashMap<>();
                             query.put("summary", tc.getSummary());
                             query.put("author__username", user);
-                            query.put("notes__contains", marker);
+                            query.put("extra_link", tc.getReferenceLink());
                             
                             List<TestCase> cases = rpc.filter(query);
                             if (cases.size() == 0)
                             {
-                                TestCase.Builder builder = tc.newBuilder();
-                                String currentNotes = tc.getNotes();
-                                String newNotes = (currentNotes != null ? currentNotes : "") + "\n" + marker;
-                                builder.withNotes(newNotes);
-                                long id = client.testcase().create(builder.build());
+                                long id = client.testcase().create(tc);
                                 System.out.println("Created test, id =" + id);
                             }
                             else
                             {
-                                System.out.println("Would update at id =" + cases.get(0).getId());
+                                System.out.println("Updating test case.");
+                                client.testcase().update(cases.get(0).getId(), tc);
                             }
                         }
                         catch (IOException ex)
