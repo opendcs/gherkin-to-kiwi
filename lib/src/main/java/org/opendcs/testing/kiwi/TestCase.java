@@ -3,6 +3,7 @@ package org.opendcs.testing.kiwi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 public class TestCase
 {
@@ -20,13 +21,14 @@ public class TestCase
     private final List<Attachment> attachments;
     private final List<String> tags;
     private final List<Component> components;
+    private final Properties properties;
 
 
     private TestCase(long id, String summary, String steps, Priority priority,
                      Product product, Category category, String requirements,
                      String notes, String arguments, String referenceLink,
                      String status, List<Attachment> attachments, List<String> tags,
-                     List<Component> components)
+                     List<Component> components, Properties properties)
     {
         this.id = id;
         this.summary = summary;
@@ -42,11 +44,96 @@ public class TestCase
         this.attachments = attachments;
         this.tags = tags;
         this.components = components;
+        this.properties = properties;
     }
 
     public Builder newBuilder()
     {
         return new Builder(this);
+    }
+
+    public long getId()
+    {
+        return id;
+    }
+
+    public String getSummary()
+    {
+        return summary;
+    }
+
+    public String getSteps()
+    {
+        return steps;
+    }
+
+    public Priority getPriority()
+    {
+        return priority;
+    }
+
+    public Product getProduct()
+    {
+        return product;
+    }
+
+    public Category getCategory()
+    {
+        return category;
+    }
+
+    public String getRequirements()
+    {
+        return requirements;
+    }
+
+    public String getNotes()
+    {
+        return notes;
+    }
+    
+    public String getArguments()
+    {
+        return arguments;
+    }
+
+    public String getReferenceLink()
+    {
+        return referenceLink;
+    }
+
+    public String getStatus()
+    {
+        return status;
+    }
+
+    public List<Attachment> getAttachments()
+    {
+        return Collections.unmodifiableList(attachments);
+    }
+
+    public List<String> getTags()
+    {
+        return Collections.unmodifiableList(tags);
+    }
+
+    public List<Component> getComponents()
+    {
+        return Collections.unmodifiableList(components);
+    }
+
+    /**
+     * 
+     * @return A copy of the properties object.
+     */
+    public Properties getProperties()
+    {
+        return new Properties(properties);
+    }
+
+    public String getProperty(String value)
+    {
+        return properties.getProperty(value);
     }
 
     public static class Builder
@@ -65,6 +152,7 @@ public class TestCase
         private String arguments = null;
         private String referenceLink = null;
         private String status = "CONFIRMED";
+        private Properties properties = new Properties();
 
         public Builder(String product)
         {
@@ -88,13 +176,14 @@ public class TestCase
             this.attachments = new ArrayList<>(attachments);
             this.tags = new ArrayList<>(tags);
             this.components = new ArrayList<>(components);
+            this.properties.putAll(tc.properties);
         }
 
         public TestCase build()
         {
             return new TestCase(id, summary, steps, priority, product,
                                 category, requirements,notes,arguments,referenceLink,status,
-                                attachments, tags, components);
+                                attachments, tags, components, properties);
         }
 
         public Builder withId(long id)
@@ -170,75 +259,39 @@ public class TestCase
             return this;
         }
 
+        /**
+         * Property to set or unset
+         * @param name name of the property
+         * @param value value for the property. If null property will be removed.
+         * @return
+         */
+        public Builder withProperty(String name, String value)
+        {
+            if (value != null)
+            {
+                this.properties.setProperty(name, value);
+            }
+            else
+            {
+                this.properties.remove(name);
+            }
+            return this;
+        }
     }
 
-    public long getId()
+    public static class TestCaseProperty
     {
-        return id;
-    }
+        public final long id;
+        public final long caseId;
+        public final String name;
+        public final String value;
 
-    public String getSummary()
-    {
-        return summary;
-    }
-
-    public String getSteps()
-    {
-        return steps;
-    }
-
-    public Priority getPriority()
-    {
-        return priority;
-    }
-
-    public Product getProduct()
-    {
-        return product;
-    }
-
-    public Category getCategory()
-    {
-        return category;
-    }
-
-    public String getRequirements()
-    {
-        return requirements;
-    }
-
-    public String getNotes()
-    {
-        return notes;
-    }
-    
-    public String getArguments()
-    {
-        return arguments;
-    }
-
-    public String getReferenceLink()
-    {
-        return referenceLink;
-    }
-
-    public String getStatus()
-    {
-        return status;
-    }
-
-    public List<Attachment> getAttachments()
-    {
-        return Collections.unmodifiableList(attachments);
-    }
-
-    public List<String> getTags()
-    {
-        return Collections.unmodifiableList(tags);
-    }
-
-    public List<Component> getComponents()
-    {
-        return Collections.unmodifiableList(components);
+        public TestCaseProperty(long id, long caseId, String name, String value)
+        {
+            this.id = id;
+            this.caseId = caseId;
+            this.name = name;
+            this.value = value;
+        }
     }
 }

@@ -70,8 +70,46 @@ public class TestCaseRpc
         rpcReq.setPositionalParams(Arrays.asList(id, params ));
         JSONRPC2Response response = client.rpcRequest(rpcReq);
         JsonNode node = jsonMapper.readTree(response.getResult().toString());
-        return fillTestCase(node);
-        
+        return fillTestCase(node);        
+    }
+
+    public List<TestCase.TestCaseProperty> properties(Map<String,String> query) throws IOException
+    {
+        List<TestCase.TestCaseProperty> properties = new ArrayList<>();
+        JSONRPC2Request rpcReq = new JSONRPC2Request("TestCase.properties", UUID.randomUUID().toString());
+        rpcReq.setPositionalParams(Arrays.asList(query));
+        JSONRPC2Response response = client.rpcRequest(rpcReq);
+        JsonNode node = jsonMapper.readTree(response.getResult().toString());
+        node.forEach(e ->
+        {
+            properties.add(
+                new TestCase.TestCaseProperty(
+                    e.get("id").asLong(),
+                    e.get("case").asLong(),
+                    e.get("name").asText(),
+                    e.get("value").asText())
+            );
+        });
+        return properties;
+    }
+
+    public TestCase.TestCaseProperty add_property(long id, String name, String value) throws IOException
+    {
+        JSONRPC2Request rpcReq = new JSONRPC2Request("TestCase.add_property", UUID.randomUUID().toString());
+        rpcReq.setPositionalParams(Arrays.asList(id, name, value));
+        JSONRPC2Response response = client.rpcRequest(rpcReq);
+        JsonNode node = jsonMapper.readTree(response.getResult().toString());
+        return new TestCase.TestCaseProperty(node.get("id").asLong(),
+                                    node.get("case").asLong(),
+                                    node.get("name").asText(),
+                                    node.get("value").asText());
+    }
+
+    public void remove_property(Map<String,String> query) throws IOException
+    {
+        JSONRPC2Request rpcReq = new JSONRPC2Request("TestCase.remove_property", UUID.randomUUID().toString());
+        rpcReq.setPositionalParams(Arrays.asList(query));
+        client.rpcRequest(rpcReq);
     }
 
     private Map<String,Object> testCaseElementsToMap(TestCase tc)
@@ -99,4 +137,6 @@ public class TestCaseRpc
             .withNotes(node.get("notes").asText())
             .build();
     }
+
+
 }

@@ -79,10 +79,11 @@ public class TestCaseGenerator
                             pw.println(String.format("%s: %s", typeName, s.getText()));
                         });
                     }
-                    // TODO: probably need to be able to tweak the URI to something sensible like the project URL vs the local
-                    // FileSystem. Or just Strip to not include the host.                    
-                    testBuilder.withReferenceLink(p.getUri());
+                    
                     testBuilder.withSteps(sw.toString());
+                    // TODO: probably need to be able to tweak the URI to something sensible like the project URL vs the local
+                    // FileSystem. Or just Strip to not include the host. 
+                    testBuilder.withProperty("marker", String.format("%s-%s", p.getUri(), p.getName()));
                     kiwiCases.add(testBuilder.build());
                 });
             });
@@ -107,22 +108,28 @@ public class TestCaseGenerator
                      {
                         try
                         {
-                            TestCaseRpc rpc = client.testcase();
-                            Map<String,String> query = new HashMap<>();
-                            query.put("summary", tc.getSummary());
-                            query.put("author__username", user);
-                            query.put("extra_link", tc.getReferenceLink());
+                            String marker = tc.getProperty("marker");
                             
-                            List<TestCase> cases = rpc.filter(query);
-                            if (cases.size() == 0)
+                            TestCaseRpc rpc = client.testcase();
+                            
+                            Map<String,String> query = new HashMap<>();
+                            query.put("name", "marker");
+                            query.put("value", marker);
+                            long id = rpc.properties(query)
+                                         .stream()
+                                         .map(e -> e.caseId)
+                                         .findFirst()
+                                         .orElse(-1L);
+                            if (id == -1)
                             {
-                                long id = client.testcase().create(tc);
-                                System.out.println("Created test, id =" + id);
+                                long idOut = client.testcase().create(tc);
+                                client.testcase().add_property(idOut, "marker", marker);
+                                System.out.println("Created test, id =" + idOut);
                             }
                             else
                             {
                                 System.out.println("Updating test case.");
-                                client.testcase().update(cases.get(0).getId(), tc);
+                                client.testcase().update(id, tc);
                             }
                         }
                         catch (IOException ex)

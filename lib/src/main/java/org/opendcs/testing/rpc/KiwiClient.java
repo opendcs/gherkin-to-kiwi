@@ -45,7 +45,7 @@ public class KiwiClient
     {
 
         baseUrl = url+"/json-rpc/";
-        File cache = Files.createTempDirectory("kiwiokhttpcace").toFile();
+        File cache = Files.createTempDirectory("kiwiokhttpcache").toFile();
         cache.deleteOnExit();
         /** For the love of sanity make sure this get removed before an actual release
          * this is just so I can focus on writing the actual RPC code without fiddling with
