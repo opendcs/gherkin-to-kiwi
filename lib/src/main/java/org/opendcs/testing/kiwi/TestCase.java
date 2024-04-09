@@ -194,7 +194,7 @@ public class TestCase
 
         public Builder withComponent(String component)
         {
-            this.components.add(new Component(product.name, component)); 
+            this.components.add(new Component(product, component)); 
             return this;
         }
 

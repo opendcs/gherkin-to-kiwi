@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -17,6 +19,8 @@ import javax.net.ssl.X509TrustManager;
 
 import org.opendcs.testing.kiwi.TestCase;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
@@ -32,7 +36,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class KiwiClient
+public final class KiwiClient
 {
     public static final MediaType APPLICATION_JSON = MediaType.get("application/json");
 
@@ -40,6 +44,7 @@ public class KiwiClient
     private final String baseUrl;
 
     private final TestCaseRpc testCaseRpc;
+    private final ObjectMapper jsonMapper = new ObjectMapper();
 
     public KiwiClient(String url, String username, String password) throws IOException
     {
@@ -142,5 +147,73 @@ public class KiwiClient
         {
             throw new IOException("Invalid response from server", ex);
         }
+    }
+    
+    
+    public JSONRPC2Request createRequest(String method) {
+        return new JSONRPC2Request(method, UUID.randomUUID().toString());
+    }
+
+    public JSONRPC2Request createRequest(String method, List<Object> positionalParams) {
+        return createRequest(method, positionalParams, null);
+    }
+
+    public JSONRPC2Request createRequest(String method, Map<String,Object> namedParams) {
+        return createRequest(method, null, namedParams);
+    }
+
+    public JSONRPC2Request createRequest(String method, List<Object> positionalParams, Map<String, Object> namedParams)
+    {
+        JSONRPC2Request rpcReq = createRequest(method);
+        if (positionalParams != null) {
+            rpcReq.setPositionalParams(positionalParams);
+        }
+        if (namedParams != null) {
+            rpcReq.setNamedParams(namedParams);
+        }
+        return rpcReq;
+    }
+
+
+    public <T,R> R create(String method, Function<T,List<Object>> mapPositional,
+                          Function<T, Map<String,Object>> mapNamed, Function<JsonNode,R> mapResult, T obj) throws IOException {
+            List<Object> positional = mapPositional != null ? mapPositional.apply(obj) : null;
+            Map<String,Object> named = mapNamed != null ? mapNamed.apply(obj) : null;
+            JSONRPC2Request rpcReq = createRequest(method, positional, named);
+            JSONRPC2Response response = rpcRequest(rpcReq);
+            String jsonString = response.getResult().toString();
+            JsonNode node = jsonMapper.readTree(jsonString);
+            return mapResult.apply(node);
+    }
+
+    public <R> List<R> filter(String method, Function<JsonNode,R> mapResult, Map<String,String> query) throws IOException {
+        List<R> items = new ArrayList<>();
+        JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(query));
+        JSONRPC2Response response = rpcRequest(rpcReq);
+        String jsonString = response.getResult().toString();
+        JsonNode node = jsonMapper.readTree(jsonString);
+        node.forEach(e ->
+        {
+            R item = mapResult.apply(node);
+            items.add(item);
+        });
+        return items;
+    }
+
+    public <T,R> R update(String method, Function<T,List<Object>> mapPositional,
+                          Function<T, Map<String,Object>> mapNamed, Function<JsonNode,R> mapResult, long id, T obj) throws IOException {
+        if (id <= 0) {
+            throw new IOException("Cannot update TestCase without ID.");
+        }
+        List<Object> positional = new ArrayList<>();
+        positional.add(id);
+        if (mapPositional != null) {
+            positional.addAll(mapPositional.apply(obj));
+        }
+        Map<String,Object> named = mapNamed != null ? mapNamed.apply(obj) : null;
+        JSONRPC2Request rpcReq = createRequest("TestCase.update", positional, named);
+        JSONRPC2Response response = rpcRequest(rpcReq);
+        JsonNode node = jsonMapper.readTree(response.getResult().toString());
+        return mapResult.apply(node);
     }
 }
