@@ -6,20 +6,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
+import org.opendcs.testing.kiwi.Category;
+import org.opendcs.testing.kiwi.Component;
 import org.opendcs.testing.kiwi.Priority;
 import org.opendcs.testing.kiwi.TestCase;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 public final class TestCaseRpc
 {
     private final KiwiClient client;
-    private final ObjectMapper jsonMapper = new ObjectMapper();
 
     public TestCaseRpc(KiwiClient client)
     {
@@ -31,13 +28,18 @@ public final class TestCaseRpc
      * @param tc
      * @return
      */
-    public long create(TestCase tc) throws IOException
+    public TestCase create(TestCase tc) throws IOException
     {
-        return client.create("TestCase.create", 
-                             t -> Arrays.asList(testCaseElementsToMap(t, client)), 
+        long id = client.create("TestCase.create",
+                             t -> Arrays.asList(testCaseElementsToMap(t, client)),
                              null,
                              (node) -> node.get("id").asLong(),
                              tc);
+        Map<String,String> query = new HashMap<>();
+        query.put("id", ""+id);
+        return filter(query).stream()
+                            .findFirst()
+                            .orElseThrow(() -> new IOException("TestCase could not be read back."));
     }
 
     public List<TestCase> filter(Map<String,String> query) throws IOException
@@ -51,7 +53,7 @@ public final class TestCaseRpc
                              t -> Arrays.asList(testCaseElementsToMap(t, client)),
                              null,
                              TestCaseRpc::fillTestCase,
-                             id, 
+                             id,
                              tc);
     }
 
@@ -74,7 +76,7 @@ public final class TestCaseRpc
                              node.get("case").asLong(),
                              node.get("name").asText(),
                              node.get("value").asText()),
-                             Arrays.asList(id, name, value)        
+                             Arrays.asList(id, name, value)
         );
     }
 
@@ -83,13 +85,25 @@ public final class TestCaseRpc
         client.remove("TestCase.remove_property", query);
     }
 
+    public Component add_component(long caseId, String componentName) throws IOException {
+        return client.create("TestCase.add_component",
+                             (s) -> Arrays.asList(caseId,s),
+                             null,
+                             n -> ComponentRpc.jsonToComponent(n, client), componentName);
+    }
+
     private static Map<String,Object> testCaseElementsToMap(TestCase tc, KiwiClient client) throws IOException
     {
         Map<String,Object> params = new HashMap<>();
         params.put("summary", tc.getSummary());
         params.put("text", tc.getSteps());
         params.put("case_status", 2);//tc.getStatus());
-        params.put("category", 1);//tc.getCategory());
+        final Category category = tc.getCategory();
+        long categoryId = category.id;
+        if (categoryId == -1 ) {
+            categoryId = client.category().byNameAndProduct(category.name, category.product).id;
+        }
+        params.put("category", categoryId);
         final Priority p = tc.getPriority();
         params.put("priority", p.id);
         if (p.id == -1 ) {

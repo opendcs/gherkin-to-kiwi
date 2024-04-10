@@ -31,8 +31,6 @@ public final class ComponentRpc {
                              component);
     }
 
-    
-
     public Component update(long componentId, Component newComponent) {
         return null;
     }
@@ -41,7 +39,7 @@ public final class ComponentRpc {
         return client.filter("Component.filter", n -> jsonToComponent(n, client), query);
     }
 
-    private static Component jsonToComponent(JsonNode node, KiwiClient client) throws IOException {
+    static Component jsonToComponent(JsonNode node, KiwiClient client) throws IOException {
         Map<String,String> productQuery = new HashMap<>();
         productQuery.put("id", node.get("product_id").asText());
         Product p = client.product()
@@ -52,7 +50,7 @@ public final class ComponentRpc {
         return Component.of(node.get("id").asLong(), p, node.get("name").asText());
     }
 
-    private static Map<String, Object> componentElementsToMap(Component component, KiwiClient client) throws IOException {
+    static Map<String, Object> componentElementsToMap(Component component, KiwiClient client) throws IOException {
         Map<String,Object> map = new HashMap<>();
         map.put("name", component.name);
         if (component.product.id > 0) {

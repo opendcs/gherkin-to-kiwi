@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.opendcs.testing.kiwi.Component;
 import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.testing.rpc.TestCaseRpc;
@@ -46,7 +47,7 @@ public class TestCaseGenerator
     {
         List<TestCase> kiwiCases = new ArrayList<>();
         final AtomicReference<String> currentFeature = new AtomicReference<>();
-        
+
         parser.parse(path)
               .forEach(e ->
             {
@@ -79,7 +80,7 @@ public class TestCaseGenerator
                             pw.println(String.format("%s: %s", typeName, s.getText()));
                         });
                     }
-                    
+
                     testBuilder.withSteps(sw.toString());
                     // TODO: probably need to be able to tweak the URI to something sensible like the project URL vs the local
                     // FileSystem. Or just Strip to not include the host. 
@@ -93,9 +94,8 @@ public class TestCaseGenerator
 
     public static void main (String args[])
     {
-        
         Path path = Paths.get("src/test/resources/feature-files/PlatformListSorting.feature");
-        TestCaseGenerator generator = new TestCaseGenerator("Test");
+        TestCaseGenerator generator = new TestCaseGenerator("OpenDCS");
         try
         {
             final String url = args[0];
@@ -108,11 +108,11 @@ public class TestCaseGenerator
                      {
                         try
                         {
-                            System.out.println("PUshing " + tc + " To kiwi");
+                            System.out.println("Pushing " + tc + " To kiwi");
                             String marker = tc.getProperty("marker");
-                            
+
                             TestCaseRpc rpc = client.testcase();
-                            
+
                             Map<String,String> query = new HashMap<>();
                             query.put("name", "marker");
                             query.put("value", marker);
@@ -123,8 +123,12 @@ public class TestCaseGenerator
                                          .orElse(-1L);
                             if (id == -1)
                             {
-                                long idOut = client.testcase().create(tc);
+                                TestCase tcOut = client.testcase().create(tc);
+                                long idOut = tcOut.getId();
                                 client.testcase().add_property(idOut, "marker", marker);
+                                for (Component c: tc.getComponents()) {
+                                    client.testcase().add_component(idOut, c.name); 
+                                }
                                 System.out.println("Created test, id =" + idOut);
                             }
                             else

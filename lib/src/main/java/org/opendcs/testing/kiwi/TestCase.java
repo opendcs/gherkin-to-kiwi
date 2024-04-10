@@ -23,7 +23,6 @@ public class TestCase
     private final List<Component> components;
     private final Properties properties;
 
-
     private TestCase(long id, String summary, String steps, Priority priority,
                      Product product, Category category, String requirements,
                      String notes, String arguments, String referenceLink,
@@ -142,7 +141,7 @@ public class TestCase
              + "Summary=" + this.summary + ","
              + "Product=" + this.product.name + ","
              + "Category=" + this.category.name + ","
-             + "Components=" + this.components.toString() + ","
+             + "Components=" + this.components.toString()
              + "}";
     }
 

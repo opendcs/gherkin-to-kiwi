@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.opendcs.testing.kiwi.Product;
 
@@ -18,7 +19,7 @@ public final class ProductRpc {
     {
         this.client = client;
     }
- 
+
     public Product create(Product product) throws IOException {
         return client.create("Product.create",
                              p -> Arrays.asList(productElementsToMap(p)),
@@ -29,6 +30,19 @@ public final class ProductRpc {
 
     public List<Product> filter(Map<String, String> query) throws IOException {
         return client.filter("Product.filter", ProductRpc::jsonToProduct, query);
+    }
+
+    public Product byId(long id) throws IOException {
+        Optional<Product> p = Product.existingOfId(id);
+        if (p.isPresent()) {
+            return p.get();
+        } else {
+            Map<String,String> query = new HashMap<>();
+            query.put("id", "" + id);
+            return filter(query).stream()
+                                .findFirst()
+                                .orElseThrow(() -> new IOException("No product with id = " + id));
+        }
     }
 
     private static Map<String, Object> productElementsToMap(Product product) {

@@ -2,6 +2,7 @@ package org.opendcs.testing.kiwi;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Product {
     public final long id;
@@ -28,5 +29,10 @@ public class Product {
                 .filter(p -> p.name.equals(name))
                 .findFirst()
                 .orElseGet(() -> new Product(name));
+    }
+
+    public static Optional<Product> existingOfId(long id)
+    {
+        return Optional.ofNullable(products.getOrDefault(id, null));
     }
 }

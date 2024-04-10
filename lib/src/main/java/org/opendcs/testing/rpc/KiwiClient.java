@@ -48,6 +48,7 @@ public final class KiwiClient
     private final ComponentRpc componentRpc;
     private final ProductRpc productRpc;
     private final PriorityRpc priorityRpc;
+    private final CategoryRpc categoryRpc;
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
     public KiwiClient(String url, String username, String password) throws IOException
@@ -84,7 +85,7 @@ public final class KiwiClient
             CookieJar cookieJar = new CookieJar() {
                 Map<HttpUrl, List<Cookie>> cookies = Collections.synchronizedMap(new HashMap<>());
                 @Override
-                public List<Cookie> loadForRequest(HttpUrl url) 
+                public List<Cookie> loadForRequest(HttpUrl url)
                 {
                     return cookies.computeIfAbsent(url, key -> new ArrayList<Cookie>());
                 }
@@ -92,7 +93,7 @@ public final class KiwiClient
                 @Override
                 public void saveFromResponse(HttpUrl url, List<Cookie> cookiesForUrl)
                 {
-                    cookies.put(url, cookiesForUrl);   
+                    cookies.put(url, cookiesForUrl);
                 }
             };
             client = new OkHttpClient.Builder().cache(new Cache(cache,30*1024*1024)) // 30MB
@@ -105,11 +106,11 @@ public final class KiwiClient
             componentRpc = new ComponentRpc(this);
             productRpc = new ProductRpc(this);
             priorityRpc = new PriorityRpc(this);
+            categoryRpc = new CategoryRpc(this);
         }
         catch (Exception ex)
         {
             throw new IOException("Trust creation error.", ex);
-            
         }
     }
 
@@ -129,6 +130,10 @@ public final class KiwiClient
 
     public PriorityRpc priority() {
         return priorityRpc;
+    }
+
+    public CategoryRpc category() {
+        return categoryRpc;
     }
 
     private void login(String user, String password) throws IOException
@@ -168,8 +173,7 @@ public final class KiwiClient
             throw new IOException("Invalid response from server", ex);
         }
     }
-    
-    
+
     public JSONRPC2Request createRequest(String method) {
         return new JSONRPC2Request(method, UUID.randomUUID().toString());
     }
