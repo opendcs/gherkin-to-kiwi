@@ -44,17 +44,24 @@ public final class TestCaseRpc
 
     public List<TestCase> filter(Map<String,String> query) throws IOException
     {
-        return client.filter("TestCase.filter", node -> fillTestCase(node), query);
+        return client.filter("TestCase.filter", node -> fillTestCase(node, client), query);
     }
 
     public TestCase update(long id, TestCase tc) throws IOException
     {
-        return client.update("TestCase.update",
-                             t -> Arrays.asList(testCaseElementsToMap(t, client)),
-                             null,
-                             TestCaseRpc::fillTestCase,
-                             id,
-                             tc);
+        TestCase tcOut = client.update("TestCase.update",
+                                    t -> Arrays.asList(testCaseElementsToMap(t, client)),
+                                    null,
+                                    n -> fillTestCase(n, client),
+                                    id,
+                                    tc);
+        for (Component c: tcOut.getComponents()) {
+            remove_component(id, c);
+        }
+        for (Component c: tc.getComponents()) {
+            add_component(id, c);
+        }
+        return tcOut;
     }
 
     public List<TestCase.TestCaseProperty> properties(Map<String,String> query) throws IOException
@@ -85,11 +92,39 @@ public final class TestCaseRpc
         client.remove("TestCase.remove_property", query);
     }
 
-    public Component add_component(long caseId, String componentName) throws IOException {
+    public Component add_component(long caseId, Component component) throws IOException {
+        return add_component(caseId, component, false);
+    }
+
+    public void remove_component(long caseId, Component component) throws IOException {
+        if (component.id == -1) {
+            throw new IOException("Component provided does not have an ID listed.");
+        }
+        Map<String,String> query = new HashMap<>();
+        query.put("id", "" + caseId);
+        query.put("component_id", "" + component.id);
+        client.remove("TestCase.remove_component", query);
+    }
+
+    public List<Component> components(long caseId) throws IOException {
+        Map<String,String> query = new HashMap<>();
+        query.put("id", "" + caseId);
+        return client.filter("TestCase.components", n -> ComponentRpc.jsonToComponent(n, client), query);
+    }
+
+    public Component add_component(long caseId, Component component, boolean create) throws IOException {
+        Map<String,String> query = new HashMap<>();
+        query.put("name", component.name);
+        query.put("product__name", component.product.name);
+        List<Component> components = client.component().filter(query);
+        if (components.isEmpty() && create) {
+            System.out.println("Creating component: " + component);
+            client.component().create(component);
+        }
         return client.create("TestCase.add_component",
                              (s) -> Arrays.asList(caseId,s),
                              null,
-                             n -> ComponentRpc.jsonToComponent(n, client), componentName);
+                             n -> ComponentRpc.jsonToComponent(n, client), component.name);
     }
 
     private static Map<String,Object> testCaseElementsToMap(TestCase tc, KiwiClient client) throws IOException
@@ -116,18 +151,22 @@ public final class TestCaseRpc
         return params;
     }
 
-    private static TestCase fillTestCase(JsonNode node)
-    {
-        return new TestCase.Builder("-todo-")
+    private static TestCase fillTestCase(JsonNode node, KiwiClient client) throws IOException {
+        Map<String,String> query = new HashMap<>();
+        query.put("id", node.get("category").asText());
+        Category category = client.category().filter(query).stream().findFirst().get();
+        TestCase.Builder builder = new TestCase.Builder(category.product.name)
             .withSteps(node.get("text").asText())
             .withPriority(node.get("priority__value").asText())
             .withSummary(node.get("summary").asText())
-            .withCategory(node.get("category__name").asText())
+            .withCategory(category.name, category.product.name)
             .withStatus(node.get("case_status__name").asText())
             .withId(node.get("id").asLong())
-            .withNotes(node.get("notes").asText())
-            .build();
+            .withNotes(node.get("notes").asText());
+        /* NOTE there doesn't appear to be possible in this structure
+        List<Component> components = client.testcase().components(builder.getId());
+        builder.withComponents(components);
+         */
+        return builder.build();
     }
-
-
 }

@@ -269,6 +269,12 @@ public class TestCase
             return this;
         }
 
+        public Builder withComponents(List<Component> components) {
+            this.components.clear();
+            this.components.addAll(components);
+            return this;
+        }
+
         /**
          * Property to set or unset
          * @param name name of the property
@@ -286,6 +292,10 @@ public class TestCase
                 this.properties.remove(name);
             }
             return this;
+        }
+
+        public long getId() {
+            return id;
         }
     }
 

@@ -41,7 +41,7 @@ public final class ComponentRpc {
 
     static Component jsonToComponent(JsonNode node, KiwiClient client) throws IOException {
         Map<String,String> productQuery = new HashMap<>();
-        productQuery.put("id", node.get("product_id").asText());
+        productQuery.put("id", node.get("product").asText());
         Product p = client.product()
                           .filter(productQuery)
                           .stream()

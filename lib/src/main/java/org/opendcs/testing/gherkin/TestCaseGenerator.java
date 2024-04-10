@@ -127,7 +127,7 @@ public class TestCaseGenerator
                                 long idOut = tcOut.getId();
                                 client.testcase().add_property(idOut, "marker", marker);
                                 for (Component c: tc.getComponents()) {
-                                    client.testcase().add_component(idOut, c.name); 
+                                    client.testcase().add_component(idOut, c, true); 
                                 }
                                 System.out.println("Created test, id =" + idOut);
                             }
