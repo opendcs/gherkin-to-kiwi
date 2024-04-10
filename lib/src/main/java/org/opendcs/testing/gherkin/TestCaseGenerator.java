@@ -108,6 +108,7 @@ public class TestCaseGenerator
                      {
                         try
                         {
+                            System.out.println("PUshing " + tc + " To kiwi");
                             String marker = tc.getProperty("marker");
                             
                             TestCaseRpc rpc = client.testcase();

@@ -38,6 +38,6 @@ public final class ProductRpc {
     }
 
     private static Product jsonToProduct(JsonNode node) {
-        return new Product(node.get("id").asLong(), node.get("name").asText());
+        return Product.of(node.get("id").asLong(), node.get("name").asText());
     }
 }

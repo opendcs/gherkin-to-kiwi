@@ -49,7 +49,7 @@ public final class ComponentRpc {
                           .stream()
                           .findFirst()
                           .orElseThrow(() -> new IOException("No Product for given ID"));
-        return new Component(p, node.get("name").asText());
+        return Component.of(node.get("id").asLong(), p, node.get("name").asText());
     }
 
     private static Map<String, Object> componentElementsToMap(Component component, KiwiClient client) throws IOException {

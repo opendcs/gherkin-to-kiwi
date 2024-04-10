@@ -91,7 +91,7 @@ public class TestCase
     {
         return notes;
     }
-    
+
     public String getArguments()
     {
         return arguments;
@@ -123,7 +123,7 @@ public class TestCase
     }
 
     /**
-     * 
+     *
      * @return A copy of the properties object.
      */
     public Properties getProperties()
@@ -134,6 +134,16 @@ public class TestCase
     public String getProperty(String value)
     {
         return properties.getProperty(value);
+    }
+
+    @Override
+    public String toString() {
+        return "testcase{"
+             + "Summary=" + this.summary + ","
+             + "Product=" + this.product.name + ","
+             + "Category=" + this.category.name + ","
+             + "Components=" + this.components.toString() + ","
+             + "}";
     }
 
     public static class Builder
@@ -154,10 +164,10 @@ public class TestCase
         private String status = "CONFIRMED";
         private Properties properties = new Properties();
 
-        public Builder(String product)
+        public Builder(String productName)
         {
-            this.product = new Product(product);
-            this.category = new Category(product, "--default--");
+            this.product = Product.of(productName);
+            this.category = Category.of(product, "--default--");
         }
 
         public Builder(TestCase tc)
@@ -194,7 +204,7 @@ public class TestCase
 
         public Builder withComponent(String component)
         {
-            this.components.add(new Component(product, component)); 
+            this.components.add(Component.of(product, component));
             return this;
         }
 
@@ -215,7 +225,7 @@ public class TestCase
             this.tags.add(tag);
             return this;
         }
-        
+
         public Builder withNotes(String notes)
         {
             this.notes = notes;
@@ -228,16 +238,17 @@ public class TestCase
             return this;
         }
 
-        public Builder withCategory(String category, String product)
+        public Builder withCategory(String category, String productName)
         {
-            this.category = new Category(product, category);
-            this.product = new Product(product);
+            this.product = Product.of(productName);
+            this.category = Category.of(product, category);
+
             return this;
         }
 
         public Builder withCategory(String category)
         {
-            this.category = new Category(this.product.name, category);
+            this.category = Category.of(this.product, category);
             return this;
         }
 
