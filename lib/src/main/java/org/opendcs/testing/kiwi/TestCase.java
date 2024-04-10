@@ -243,7 +243,7 @@ public class TestCase
 
         public Builder withPriority(String priority)
         {
-            this.priority = new Priority(priority);
+            this.priority = Priority.of(priority);
             return this;
         }
 

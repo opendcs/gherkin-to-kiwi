@@ -1,21 +1,33 @@
 package org.opendcs.testing.kiwi;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Priority
 {
-    private static List<Priority> priorities = new ArrayList<>();;
+    private static Map<Long,Priority> priorities = new HashMap<>();;
     
+    public final long id;
     public final String name;
 
-    public Priority(String name)
+    private Priority(long id, String name)
     {
+        this.id = id;
         this.name = name;
     }
 
-    public Priority fromString(String priorityName)
+    public static Priority of(long id, String priorityName)
     {
-        return null;
+        return priorities.computeIfAbsent(id, key -> {
+            return new Priority(id, priorityName);
+        });        
+    }
+
+    public static Priority of(final String priorityName) {
+        return priorities.values()
+                  .stream()
+                  .filter(p -> p.name.equals(priorityName))
+                  .findFirst()
+                  .orElseGet(() -> new Priority(-1, priorityName));
     }
 }

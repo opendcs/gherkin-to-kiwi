@@ -18,6 +18,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.opendcs.testing.kiwi.TestCase;
+import org.opendcs.testing.util.ThrowingFunction;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +45,9 @@ public final class KiwiClient
     private final String baseUrl;
 
     private final TestCaseRpc testCaseRpc;
+    private final ComponentRpc componentRpc;
+    private final ProductRpc productRpc;
+    private final PriorityRpc priorityRpc;
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
     public KiwiClient(String url, String username, String password) throws IOException
@@ -98,6 +102,9 @@ public final class KiwiClient
                                  .build();
             this.login(username, password);
             testCaseRpc = new TestCaseRpc(this);
+            componentRpc = new ComponentRpc(this);
+            productRpc = new ProductRpc(this);
+            priorityRpc = new PriorityRpc(this);
         }
         catch (Exception ex)
         {
@@ -109,6 +116,19 @@ public final class KiwiClient
     public TestCaseRpc testcase()
     {
         return testCaseRpc;
+    }
+
+    public ComponentRpc component()
+    {
+        return componentRpc;
+    }
+
+    public ProductRpc product() {
+        return productRpc;
+    }
+
+    public PriorityRpc priority() {
+        return priorityRpc;
     }
 
     private void login(String user, String password) throws IOException
@@ -175,8 +195,8 @@ public final class KiwiClient
     }
 
 
-    public <T,R> R create(String method, Function<T,List<Object>> mapPositional,
-                          Function<T, Map<String,Object>> mapNamed, Function<JsonNode,R> mapResult, T obj) throws IOException {
+    public <T,R> R create(String method, ThrowingFunction<T,List<Object>> mapPositional,
+                          ThrowingFunction<T, Map<String,Object>> mapNamed, ThrowingFunction<JsonNode,R> mapResult, T obj) throws IOException {
             List<Object> positional = mapPositional != null ? mapPositional.apply(obj) : null;
             Map<String,Object> named = mapNamed != null ? mapNamed.apply(obj) : null;
             JSONRPC2Request rpcReq = createRequest(method, positional, named);
@@ -186,22 +206,21 @@ public final class KiwiClient
             return mapResult.apply(node);
     }
 
-    public <R> List<R> filter(String method, Function<JsonNode,R> mapResult, Map<String,String> query) throws IOException {
+    public <R> List<R> filter(String method, ThrowingFunction<JsonNode,R> mapResult, Map<String,String> query) throws IOException {
         List<R> items = new ArrayList<>();
         JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(query));
         JSONRPC2Response response = rpcRequest(rpcReq);
         String jsonString = response.getResult().toString();
         JsonNode node = jsonMapper.readTree(jsonString);
-        node.forEach(e ->
-        {
-            R item = mapResult.apply(node);
+        for(JsonNode e: node) {
+            R item = mapResult.apply(e);
             items.add(item);
-        });
+        }
         return items;
     }
 
-    public <T,R> R update(String method, Function<T,List<Object>> mapPositional,
-                          Function<T, Map<String,Object>> mapNamed, Function<JsonNode,R> mapResult, long id, T obj) throws IOException {
+    public <T,R> R update(String method, ThrowingFunction<T,List<Object>> mapPositional,
+                          ThrowingFunction<T, Map<String,Object>> mapNamed, ThrowingFunction<JsonNode,R> mapResult, long id, T obj) throws IOException {
         if (id <= 0) {
             throw new IOException("Cannot update TestCase without ID.");
         }
@@ -215,5 +234,10 @@ public final class KiwiClient
         JSONRPC2Response response = rpcRequest(rpcReq);
         JsonNode node = jsonMapper.readTree(response.getResult().toString());
         return mapResult.apply(node);
+    }
+
+    public void remove(String method, Map<String,String> query) throws IOException {
+        JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(query));
+        rpcRequest(rpcReq);
     }
 }

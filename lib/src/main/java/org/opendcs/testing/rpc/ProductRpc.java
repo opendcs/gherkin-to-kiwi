@@ -10,13 +10,9 @@ import java.util.Map;
 import org.opendcs.testing.kiwi.Product;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 public final class ProductRpc {
     private final KiwiClient client;
-    private final ObjectMapper jsonMapper = new ObjectMapper();
 
     public ProductRpc(KiwiClient client)
     {
@@ -24,33 +20,24 @@ public final class ProductRpc {
     }
  
     public Product create(Product product) throws IOException {
-        Map<String,Object> params = productElementsToMap(product);
-        JSONRPC2Request rpcReq = client.createRequest("Product.create",Arrays.asList(params));
-        JSONRPC2Response response = client.rpcRequest(rpcReq);
-        String jsonString = response.getResult().toString();
-        JsonNode node = jsonMapper.readTree(jsonString);
-        return jsonToProduct(node);
+        return client.create("Product.create",
+                             p -> Arrays.asList(productElementsToMap(p)),
+                             null,
+                             ProductRpc::jsonToProduct,
+                             product);
     }
 
     public List<Product> filter(Map<String, String> query) throws IOException {
-        final List<Product> products = new ArrayList<>();
-        JSONRPC2Request rpcReq = client.createRequest("product.filter", Arrays.asList(query));
-        JSONRPC2Response response = client.rpcRequest(rpcReq);
-        String jsonString = response.getResult().toString();
-        JsonNode node = jsonMapper.readTree(jsonString);
-        node.forEach(e -> {
-            products.add(jsonToProduct(e));
-        });
-        return products;
+        return client.filter("Product.filter", ProductRpc::jsonToProduct, query);
     }
 
-    private Map<String, Object> productElementsToMap(Product product) {
+    private static Map<String, Object> productElementsToMap(Product product) {
         Map<String, Object> map = new HashMap<>();
         map.put("name", product.name);
         return map;
     }
 
-    private Product jsonToProduct(JsonNode node) {
+    private static Product jsonToProduct(JsonNode node) {
         return new Product(node.get("id").asLong(), node.get("name").asText());
     }
 }

@@ -3,20 +3,18 @@ package org.opendcs.testing.rpc;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.opendcs.testing.kiwi.Component;
+import org.opendcs.testing.kiwi.Product;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 public final class ComponentRpc {
 
     private final KiwiClient client;
-    private final ObjectMapper jsonMapper = new ObjectMapper();
 
     public ComponentRpc(KiwiClient client)
     {
@@ -24,12 +22,13 @@ public final class ComponentRpc {
     }
 
     public Component create(Component component) throws IOException {
-        Map<String,Object> params = componentElementsToMap(component);
-        JSONRPC2Request rpcReq = client.createRequest("Component.create",Arrays.asList(params));
-        JSONRPC2Response response = client.rpcRequest(rpcReq);
-        String jsonString = response.getResult().toString();
-        JsonNode node = jsonMapper.readTree(jsonString);
-        return jsonToComponent(node);
+        return client.create("Component.create",
+                             c -> Arrays.asList(componentElementsToMap(c,client)),
+                             null,
+                             n -> {
+                                return jsonToComponent(n, client);
+                             },
+                             component);
     }
 
     
@@ -38,19 +37,36 @@ public final class ComponentRpc {
         return null;
     }
 
-    public List<Component> filter(Map<String,String> query) {
-        List<Component> components = new ArrayList<>();
-
-        return components;
+    public List<Component> filter(Map<String,String> query) throws IOException {
+        return client.filter("Component.filter", n -> jsonToComponent(n, client), query);
     }
 
-    private Component jsonToComponent(JsonNode node) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'jsonToComponent'");
+    private static Component jsonToComponent(JsonNode node, KiwiClient client) throws IOException {
+        Map<String,String> productQuery = new HashMap<>();
+        productQuery.put("id", node.get("product_id").asText());
+        Product p = client.product()
+                          .filter(productQuery)
+                          .stream()
+                          .findFirst()
+                          .orElseThrow(() -> new IOException("No Product for given ID"));
+        return new Component(p, node.get("name").asText());
     }
 
-    private Map<String, Object> componentElementsToMap(Component component) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'componentElementsToMap'");
+    private static Map<String, Object> componentElementsToMap(Component component, KiwiClient client) throws IOException {
+        Map<String,Object> map = new HashMap<>();
+        map.put("name", component.name);
+        if (component.product.id > 0) {
+            map.put("product", component.product.id);
+        } else {
+            Map<String,String> productQuery = new HashMap<>();
+            productQuery.put("name",component.product.name);
+            Product p = client.product()
+                              .filter(productQuery)
+                              .stream()
+                              .findFirst()
+                              .orElseThrow(() -> new IOException("Can't find product with given name."));
+            map.put("product",p.id);
+        }
+        return map;
     }
 }

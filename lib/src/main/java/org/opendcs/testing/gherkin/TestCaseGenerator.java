@@ -64,7 +64,7 @@ public class TestCaseGenerator
                     final TestCase.Builder testBuilder = new TestCase.Builder(product);
                     testBuilder.withSummary(p.getName());
                     testBuilder.withComponent(currentFeature.get());
-
+                    testBuilder.withPriority("P3"); // TODO: allow a config file/tag/etc to establish default
                     p.getTags().forEach(t -> testBuilder.withTag(t.getName()));
                     StringWriter sw = new StringWriter();
                     final PrintWriter pw = new PrintWriter(sw);
@@ -128,7 +128,7 @@ public class TestCaseGenerator
                             }
                             else
                             {
-                                System.out.println("Updating test case.");
+                                System.out.println("Updating test case. id = " + id);
                                 client.testcase().update(id, tc);
                             }
                         }
