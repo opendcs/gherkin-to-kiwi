@@ -1,22 +1,8 @@
 plugins
 {
-    id 'java-library'
-    id 'eclipse'
+    id 'opendcs-kiwi.deps-conventions'
+    id 'opendcs-kiwi.java-conventions'
 }
-
-java
-{    
-    toolchain
-    {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
-}
-
-repositories 
-{
-    mavenCentral()
-}
-
 
 dependencies 
 {

@@ -3,6 +3,7 @@ plugins
     id 'base'
     id 'eclipse'
 }
+
 allprojects {
     group = 'org.opendcs'
     version = '1.0.0-M1'
