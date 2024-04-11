@@ -6,4 +6,7 @@ plugins
 
 dependencies {
     implementation(libs.ant)
+    implementation(project(":lib"))
+
+    testImplementation(libs.bundles.junit)
 }
