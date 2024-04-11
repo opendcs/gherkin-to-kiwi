@@ -12,8 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class PriorityRpc {
     private final KiwiClient client;
 
-    public PriorityRpc(KiwiClient client)
-    {
+    public PriorityRpc(KiwiClient client) {
         this.client = client;
     }
 

@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-public class TestCase
-{
+public class TestCase {
     private final long id;
     private final String summary;
     private final String steps;
@@ -27,8 +26,7 @@ public class TestCase
                      Product product, Category category, String requirements,
                      String notes, String arguments, String referenceLink,
                      String status, List<Attachment> attachments, List<String> tags,
-                     List<Component> components, Properties properties)
-    {
+                     List<Component> components, Properties properties) {
         this.id = id;
         this.summary = summary;
         this.steps = steps;
@@ -46,78 +44,63 @@ public class TestCase
         this.properties = properties;
     }
 
-    public Builder newBuilder()
-    {
+    public Builder newBuilder() {
         return new Builder(this);
     }
 
-    public long getId()
-    {
+    public long getId() {
         return id;
     }
 
-    public String getSummary()
-    {
+    public String getSummary() {
         return summary;
     }
 
-    public String getSteps()
-    {
+    public String getSteps() {
         return steps;
     }
 
-    public Priority getPriority()
-    {
+    public Priority getPriority() {
         return priority;
     }
 
-    public Product getProduct()
-    {
+    public Product getProduct() {
         return product;
     }
 
-    public Category getCategory()
-    {
+    public Category getCategory() {
         return category;
     }
 
-    public String getRequirements()
-    {
+    public String getRequirements() {
         return requirements;
     }
 
-    public String getNotes()
-    {
+    public String getNotes() {
         return notes;
     }
 
-    public String getArguments()
-    {
+    public String getArguments() {
         return arguments;
     }
 
-    public String getReferenceLink()
-    {
+    public String getReferenceLink() {
         return referenceLink;
     }
 
-    public String getStatus()
-    {
+    public String getStatus() {
         return status;
     }
 
-    public List<Attachment> getAttachments()
-    {
+    public List<Attachment> getAttachments() {
         return Collections.unmodifiableList(attachments);
     }
 
-    public List<String> getTags()
-    {
+    public List<String> getTags() {
         return Collections.unmodifiableList(tags);
     }
 
-    public List<Component> getComponents()
-    {
+    public List<Component> getComponents() {
         return Collections.unmodifiableList(components);
     }
 
@@ -125,13 +108,11 @@ public class TestCase
      *
      * @return A copy of the properties object.
      */
-    public Properties getProperties()
-    {
+    public Properties getProperties() {
         return new Properties(properties);
     }
 
-    public String getProperty(String value)
-    {
+    public String getProperty(String value) {
         return properties.getProperty(value);
     }
 
@@ -145,8 +126,7 @@ public class TestCase
              + "}";
     }
 
-    public static class Builder
-    {
+    public static class Builder {
         private long id = -1;
         private List<Attachment> attachments = new ArrayList<>();
         private List<String> tags = new ArrayList<>();
@@ -163,14 +143,20 @@ public class TestCase
         private String status = "CONFIRMED";
         private Properties properties = new Properties();
 
-        public Builder(String productName)
-        {
+        /**
+         * Start a new builder for a given product, using category '--default--' by default.
+         * @param productName
+         */
+        public Builder(String productName) {
             this.product = Product.of(productName);
             this.category = Category.of(product, "--default--");
         }
 
-        public Builder(TestCase tc)
-        {
+        /**
+         * New builder from an existing test case.
+         * @param tc
+         */
+        public Builder(TestCase tc) {
             this.id = tc.id;
             this.summary = tc.summary;
             this.steps = tc.steps;
@@ -188,87 +174,147 @@ public class TestCase
             this.properties.putAll(tc.properties);
         }
 
-        public TestCase build()
-        {
+        public TestCase build() {
             return new TestCase(id, summary, steps, priority, product,
                                 category, requirements,notes,arguments,referenceLink,status,
                                 attachments, tags, components, properties);
         }
 
-        public Builder withId(long id)
-        {
+        public Builder withId(long id) {
             this.id = id;
             return this;
         }
 
+        /**
+         * Add a component with the given name, will assume the current product.
+         * @param component
+         * @return
+         */
         public Builder withComponent(String component)
         {
             this.components.add(Component.of(product, component));
             return this;
         }
 
+        /**
+         * Set the summary/title of the test case.
+         * @param summary
+         * @return
+         */
         public Builder withSummary(String summary)
         {
             this.summary = summary;
             return this;
         }
 
+        /**
+         * This is the general text of the test itself.
+         * @param steps
+         * @return
+         */
         public Builder withSteps(String steps)
         {
             this.steps = steps;
             return this;
         }
 
+        /**
+         * Arbitrary tag information that may be used for searching or other
+         * organization in Kiwi.
+         * @param tag
+         * @return
+         */
         public Builder withTag(String tag)
         {
             this.tags.add(tag);
             return this;
         }
 
+        /**
+         * Additional notes to the tester for a given test case.
+         * @param notes
+         * @return
+         */
         public Builder withNotes(String notes)
         {
             this.notes = notes;
             return this;
         }
 
+        /**
+         * Short string describing a specific requirement for the test.
+         * @param requirements
+         * @return
+         */
         public Builder withRequirements(String requirements)
         {
             this.requirements = requirements;
             return this;
         }
 
+        /**
+         * Set the test category, with new product name.
+         * NOTE: this will alter the product of the testcase. and may invalidate components.
+         * @param category
+         * @param productName
+         * @return
+         */
         public Builder withCategory(String category, String productName)
         {
             this.product = Product.of(productName);
             this.category = Category.of(product, category);
-
             return this;
         }
 
+        /**
+         * Set the test category, using the established product.
+         * @param category
+         * @return
+         */
         public Builder withCategory(String category)
         {
             this.category = Category.of(this.product, category);
             return this;
         }
 
+        /**
+         * Set the test priority. Valid values depend on your Kiwi instance.
+         * @param priority
+         * @return
+         */
         public Builder withPriority(String priority)
         {
             this.priority = Priority.of(priority);
             return this;
         }
 
+        /**
+         * Set the test status. Valid values depend on your Kiwi instance.
+         * @param status
+         * @return
+         */
         public Builder withStatus(String status)
         {
             this.status = status;
             return this;
         }
 
+        /**
+         * A URL to additional resources for the test. Or the test itself.
+         * @param link
+         * @return
+         */
         public Builder withReferenceLink(String link)
         {
             this.referenceLink = link;
             return this;
         }
 
+        /**
+         * Reset the entire list of components.
+         * @param components
+         * @return
+         */
         public Builder withComponents(List<Component> components) {
             this.components.clear();
             this.components.addAll(components);
@@ -299,6 +345,9 @@ public class TestCase
         }
     }
 
+    /**
+     * Wrapper class to hold property values.
+     */
     public static class TestCaseProperty
     {
         public final long id;

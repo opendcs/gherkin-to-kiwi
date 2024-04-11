@@ -1,7 +1,6 @@
 package org.opendcs.testing.rpc;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -15,8 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 public final class ProductRpc {
     private final KiwiClient client;
 
-    public ProductRpc(KiwiClient client)
-    {
+    public ProductRpc(KiwiClient client) {
         this.client = client;
     }
 

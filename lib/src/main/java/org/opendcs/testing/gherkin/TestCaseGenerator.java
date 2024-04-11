@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.opendcs.testing.kiwi.Component;
 import org.opendcs.testing.kiwi.TestCase;
@@ -20,12 +18,10 @@ import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.testing.rpc.TestCaseRpc;
 
 import io.cucumber.gherkin.GherkinParser;
-import io.cucumber.messages.types.Envelope;
 
 import io.cucumber.messages.types.Pickle;
 import io.cucumber.messages.types.PickleStep;
 import io.cucumber.messages.types.PickleStepType;
-import io.cucumber.messages.types.PickleTag;
 
 public class TestCaseGenerator 
 {

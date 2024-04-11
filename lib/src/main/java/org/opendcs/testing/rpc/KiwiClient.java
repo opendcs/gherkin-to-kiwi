@@ -2,7 +2,6 @@ package org.opendcs.testing.rpc;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,13 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.util.ThrowingFunction;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,7 +24,6 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 import okhttp3.Cache;
-import okhttp3.ConnectionSpec;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
@@ -37,8 +33,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public final class KiwiClient
-{
+/**
+ * This class manages the HTTP/JsonRPC work to communicate with a given KiwiTCMS instance.
+ */
+public final class KiwiClient {
     public static final MediaType APPLICATION_JSON = MediaType.get("application/json");
 
     private final OkHttpClient client;
@@ -51,8 +49,7 @@ public final class KiwiClient
     private final CategoryRpc categoryRpc;
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
-    public KiwiClient(String url, String username, String password) throws IOException
-    {
+    public KiwiClient(String url, String username, String password) throws IOException {
 
         baseUrl = url+"/json-rpc/";
         File cache = Files.createTempDirectory("kiwiokhttpcache").toFile();
@@ -61,8 +58,7 @@ public final class KiwiClient
          * this is just so I can focus on writing the actual RPC code without fiddling with
          * custom certificates.
          */
-        TrustManager[] trustAllCerts = new TrustManager[]
-        {
+        TrustManager[] trustAllCerts = new TrustManager[] {
             new X509TrustManager() {
                 @Override
                 public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
@@ -78,21 +74,18 @@ public final class KiwiClient
                 }
             }
         };
-        try
-        {
+        try {
             SSLContext sslContext = SSLContext.getInstance("SSL");
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             CookieJar cookieJar = new CookieJar() {
                 Map<HttpUrl, List<Cookie>> cookies = Collections.synchronizedMap(new HashMap<>());
                 @Override
-                public List<Cookie> loadForRequest(HttpUrl url)
-                {
+                public List<Cookie> loadForRequest(HttpUrl url) {
                     return cookies.computeIfAbsent(url, key -> new ArrayList<Cookie>());
                 }
 
                 @Override
-                public void saveFromResponse(HttpUrl url, List<Cookie> cookiesForUrl)
-                {
+                public void saveFromResponse(HttpUrl url, List<Cookie> cookiesForUrl) {
                     cookies.put(url, cookiesForUrl);
                 }
             };
@@ -107,37 +100,58 @@ public final class KiwiClient
             productRpc = new ProductRpc(this);
             priorityRpc = new PriorityRpc(this);
             categoryRpc = new CategoryRpc(this);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             throw new IOException("Trust creation error.", ex);
         }
     }
 
-    public TestCaseRpc testcase()
-    {
+    /**
+     * Retrieve RPC for test case operations.
+     * @return
+     */
+    public TestCaseRpc testcase() {
         return testCaseRpc;
     }
 
-    public ComponentRpc component()
-    {
+    /**
+     * Retrieve RPC for component operations.
+     * @return
+     */
+    public ComponentRpc component() {
         return componentRpc;
     }
 
+    /**
+     * Retrieve RPC for product operations.
+     * @return
+     */
     public ProductRpc product() {
         return productRpc;
     }
 
+    /**
+     * Retrieve RPC for priority operations.
+     * @return
+     */
     public PriorityRpc priority() {
         return priorityRpc;
     }
 
+    /**
+     * Retrieve RPC for category operations.
+     * @return
+     */
     public CategoryRpc category() {
         return categoryRpc;
     }
 
-    private void login(String user, String password) throws IOException
-    {
+    /**
+     * Handle login to the Kiwi Instance.
+     * @param user
+     * @param password
+     * @throws IOException
+     */
+    private void login(String user, String password) throws IOException {
         JSONRPC2Request rpcRequest = new JSONRPC2Request("Auth.login", 0);
         Map<String,Object> params = new HashMap<>();
         params.put("username",user);
@@ -146,47 +160,71 @@ public final class KiwiClient
         rpcRequest(rpcRequest);
     }
 
-    public JSONRPC2Response rpcRequest(JSONRPC2Request request) throws IOException
-    {
+    /**
+     * Performance an RPC request sequence.
+     * @param request prefilled request.
+     * @return a valid JSONRPC2Response object
+     * @throws IOException If there is an error with the HTTP request, or the JSONRPC2Response returns a failure.
+     */
+    JSONRPC2Response rpcRequest(JSONRPC2Request request) throws IOException {
         Request httpRequest = new Request.Builder()
                                  .url(baseUrl)
                                  .post(RequestBody.create(request.toString(),APPLICATION_JSON))
                                  .build();
         Response httpResponse = client.newCall(httpRequest).execute();
-        if (!httpResponse.isSuccessful())
-        {
+        if (!httpResponse.isSuccessful()) {
             throw new IOException("HTTP Call failed with error " + httpResponse.code());
         }
         String body = httpResponse.body().string();
         JSONRPC2Response rpcResponse;
-        try
-        {
+        try {
             rpcResponse = JSONRPC2Response.parse(body);
-            if (rpcResponse.getError() != null)
-            {
+            if (rpcResponse.getError() != null) {
                 throw new IOException("RPC call failed", rpcResponse.getError());
             }
             return rpcResponse;
-        }
-        catch (JSONRPC2ParseException ex)
-        {
+        } catch (JSONRPC2ParseException ex) {
             throw new IOException("Invalid response from server", ex);
         }
     }
 
-    public JSONRPC2Request createRequest(String method) {
+    /**
+     * Creates a JSONRPC2Request with a random ID.
+     * @param method The JSON RPC method name.
+     * @return
+     */
+    JSONRPC2Request createRequest(String method) {
         return new JSONRPC2Request(method, UUID.randomUUID().toString());
     }
 
-    public JSONRPC2Request createRequest(String method, List<Object> positionalParams) {
+    /**
+     * Creates a JSONRPC2Request with a random ID and the given positional parameters.
+     * @param method The JSON RPC method name
+     * @param positionalParams Positional parameters for the method
+     * @return
+     */
+    JSONRPC2Request createRequest(String method, List<Object> positionalParams) {
         return createRequest(method, positionalParams, null);
     }
 
-    public JSONRPC2Request createRequest(String method, Map<String,Object> namedParams) {
+    /**
+     * Creates a JSONRPC2Request with a random ID and given named parameters.
+     * @param method The JSON RPC method name.
+     * @param namedParams named parameters for the method.
+     * @return
+     */
+    JSONRPC2Request createRequest(String method, Map<String,Object> namedParams) {
         return createRequest(method, null, namedParams);
     }
 
-    public JSONRPC2Request createRequest(String method, List<Object> positionalParams, Map<String, Object> namedParams)
+    /**
+     * Creates a JSONRPC2Request with a random ID and given named and positional parameters
+     * @param method The JSON RPC method name.
+     * @param positionalParams The required positional parameters for the method.
+     * @param namedParams THe required named parameters for the method.
+     * @return
+     */
+    JSONRPC2Request createRequest(String method, List<Object> positionalParams, Map<String, Object> namedParams)
     {
         JSONRPC2Request rpcReq = createRequest(method);
         if (positionalParams != null) {
@@ -198,7 +236,18 @@ public final class KiwiClient
         return rpcReq;
     }
 
-
+    /**
+     * Call a JSON RPC method responsible for creating something.
+     * @param <T>
+     * @param <R>
+     * @param method
+     * @param mapPositional
+     * @param mapNamed
+     * @param mapResult
+     * @param obj
+     * @return
+     * @throws IOException
+     */
     public <T,R> R create(String method, ThrowingFunction<T,List<Object>> mapPositional,
                           ThrowingFunction<T, Map<String,Object>> mapNamed, ThrowingFunction<JsonNode,R> mapResult, T obj) throws IOException {
             List<Object> positional = mapPositional != null ? mapPositional.apply(obj) : null;

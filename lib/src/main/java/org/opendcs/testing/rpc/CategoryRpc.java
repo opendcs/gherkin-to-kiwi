@@ -14,8 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class CategoryRpc {
     private final KiwiClient client;
 
-    public CategoryRpc(KiwiClient client)
-    {
+    public CategoryRpc(KiwiClient client) {
         this.client = client;
     }
 

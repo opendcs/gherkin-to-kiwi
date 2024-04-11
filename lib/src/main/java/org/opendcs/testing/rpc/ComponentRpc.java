@@ -1,7 +1,6 @@
 package org.opendcs.testing.rpc;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -16,8 +15,7 @@ public final class ComponentRpc {
 
     private final KiwiClient client;
 
-    public ComponentRpc(KiwiClient client)
-    {
+    public ComponentRpc(KiwiClient client) {
         this.client = client;
     }
 
