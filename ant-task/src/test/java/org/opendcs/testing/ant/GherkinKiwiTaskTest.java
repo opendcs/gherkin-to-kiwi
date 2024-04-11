@@ -8,17 +8,20 @@ import org.apache.tools.ant.ProjectHelper;
 
 import org.junit.jupiter.api.Test;
 
+
 public class GherkinKiwiTaskTest {
     @Test
     public void test_kiwi_build() throws Exception {
         Project proj = new Project();
         URL url = this.getClass().getClassLoader().getResource("ant-builds/simple-build.xml");
         File buildFile = new File(url.toURI());
-        System.out.println(buildFile.getAbsolutePath());
         proj.setUserProperty("ant.file", buildFile.getAbsolutePath());
         proj.init();
+        proj.setBaseDir(new File("."));
         ProjectHelper helper = ProjectHelper.getProjectHelper();
         proj.addReference("ant.projectHelper", helper);
+        proj.setUserProperty("kiwi.url", "test");
+
         helper.parse(proj, buildFile);
         proj.executeTarget(proj.getDefaultTarget());
     }
