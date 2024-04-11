@@ -21,12 +21,11 @@ public final class ComponentRpc {
 
     public Component create(Component component) throws IOException {
         return client.create("Component.create",
-                             c -> Arrays.asList(componentElementsToMap(c,client)),
                              null,
                              n -> {
                                 return jsonToComponent(n, client);
                              },
-                             component);
+                             componentElementsToMap(component,client));
     }
 
     public Component update(long componentId, Component newComponent) {

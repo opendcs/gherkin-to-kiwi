@@ -20,10 +20,9 @@ public final class ProductRpc {
 
     public Product create(Product product) throws IOException {
         return client.create("Product.create",
-                             p -> Arrays.asList(productElementsToMap(p)),
                              null,
                              ProductRpc::jsonToProduct,
-                             product);
+                             productElementsToMap(product));
     }
 
     public List<Product> filter(Map<String, String> query) throws IOException {

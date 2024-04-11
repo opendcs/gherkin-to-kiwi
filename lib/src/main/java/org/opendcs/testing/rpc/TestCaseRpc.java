@@ -28,10 +28,9 @@ public final class TestCaseRpc {
      */
     public TestCase create(TestCase tc) throws IOException {
         long id = client.create("TestCase.create",
-                             t -> Arrays.asList(testCaseElementsToMap(t, client)),
                              null,
                              (node) -> node.get("id").asLong(),
-                             tc);
+                             testCaseElementsToMap(tc, client));
         Map<String,String> query = new HashMap<>();
         query.put("id", ""+id);
         return filter(query).stream()
@@ -47,11 +46,10 @@ public final class TestCaseRpc {
     public TestCase update(long id, TestCase tc) throws IOException
     {
         TestCase tcOut = client.update("TestCase.update",
-                                    t -> Arrays.asList(testCaseElementsToMap(t, client)),
                                     null,
                                     n -> fillTestCase(n, client),
                                     id,
-                                    tc);
+                                    testCaseElementsToMap(tc, client));
         for (Component c: tcOut.getComponents()) {
             remove_component(id, c);
         }
@@ -73,12 +71,12 @@ public final class TestCaseRpc {
 
     public TestCase.TestCaseProperty add_property(long id, String name, String value) throws IOException {
         return client.create("TestCase.add_property",
-                             l -> new ArrayList<>(l), null,
+                             null,
                              node -> new TestCase.TestCaseProperty(node.get("id").asLong(),
                              node.get("case").asLong(),
                              node.get("name").asText(),
                              node.get("value").asText()),
-                             Arrays.asList(id, name, value)
+                             id, name, value
         );
     }
 
@@ -116,9 +114,8 @@ public final class TestCaseRpc {
             client.component().create(component);
         }
         return client.create("TestCase.add_component",
-                             (s) -> Arrays.asList(caseId,s),
                              null,
-                             n -> ComponentRpc.jsonToComponent(n, client), component.name);
+                             n -> ComponentRpc.jsonToComponent(n, client), caseId, component.name);
     }
 
     private static Map<String,Object> testCaseElementsToMap(TestCase tc, KiwiClient client) throws IOException {

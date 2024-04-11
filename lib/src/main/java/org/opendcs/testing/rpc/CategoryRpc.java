@@ -21,10 +21,9 @@ public class CategoryRpc {
 
     public Category create(Category category) throws IOException {
         return client.create("Category.create",
-                             c -> Arrays.asList(toMap(c,client)),
                              null,
                              n -> fromJson(n,client),
-                             category);
+                             toMap(category,client));
     }
 
     public List<Category> filter(Map<String,String> query) throws IOException {

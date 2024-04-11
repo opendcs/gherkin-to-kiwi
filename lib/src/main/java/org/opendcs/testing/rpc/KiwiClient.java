@@ -16,6 +16,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.opendcs.testing.util.ThrowingFunction;
+import org.opendcs.testing.util.ThrowingSupplier;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -237,21 +238,19 @@ public final class KiwiClient {
     }
 
     /**
-     * Call a JSON RPC method responsible for creating something.
-     * @param <T>
-     * @param <R>
-     * @param method
-     * @param mapPositional
-     * @param mapNamed
-     * @param mapResult
-     * @param obj
-     * @return
+     * Call a KiwiTCMS JSON RPC method responsible for creating a new element in the database.
+     * @param <R> The return type
+     * @param method JSON RPC method that will be called.
+     * @param supplyNamed function that provides named parameter for the call. Can be null if none are used.
+     * @param mapResult function that will map the returned JSONNode and turn it into type R
+     * @param positionalArgs Variable list of positional arguments
+     * @return a valid instance of type R
      * @throws IOException
      */
-    public <T,R> R create(String method, ThrowingFunction<T,List<Object>> mapPositional,
-                          ThrowingFunction<T, Map<String,Object>> mapNamed, ThrowingFunction<JsonNode,R> mapResult, T obj) throws IOException {
-            List<Object> positional = mapPositional != null ? mapPositional.apply(obj) : null;
-            Map<String,Object> named = mapNamed != null ? mapNamed.apply(obj) : null;
+    public <R> R create(String method, ThrowingSupplier<Map<String,Object>> supplyNamed,
+                          ThrowingFunction<JsonNode,R> mapResult, Object ...positionalArgs) throws IOException {
+            List<Object> positional = Arrays.asList(positionalArgs);
+            Map<String,Object> named = supplyNamed != null ? supplyNamed.get() : null;
             JSONRPC2Request rpcReq = createRequest(method, positional, named);
             JSONRPC2Response response = rpcRequest(rpcReq);
             String jsonString = response.getResult().toString();
@@ -259,6 +258,15 @@ public final class KiwiClient {
             return mapResult.apply(node);
     }
 
+    /**
+     * Call a KiwiTCMS JSON RPC method responsible for performing an search, returning a list of type R
+     * @param <R> Datatype of results.
+     * @param method JSON RPC Method to be called.
+     * @param mapResult Function that will take an individual JSONNode for each element and return an object of type R.
+     * @param query map of query parameters used by the KiwiTCMS API backend
+     * @return a List of type R, always valid. For no results an empty list is returned.
+     * @throws IOException any issues with the Inputs, HTTP errors, or problems mapping a result.
+     */
     public <R> List<R> filter(String method, ThrowingFunction<JsonNode,R> mapResult, Map<String,String> query) throws IOException {
         List<R> items = new ArrayList<>();
         JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(query));
@@ -272,23 +280,40 @@ public final class KiwiClient {
         return items;
     }
 
-    public <T,R> R update(String method, ThrowingFunction<T,List<Object>> mapPositional,
-                          ThrowingFunction<T, Map<String,Object>> mapNamed, ThrowingFunction<JsonNode,R> mapResult, long id, T obj) throws IOException {
+    /**
+     * Call a KiwiTCMS JSON RPC method responsible for performing an update, return a result of type R
+     * @param <R> Datatype of result.
+     * @param method JSON RPC Method to be called.
+     * @param supplyNamed Function that supplies any named parameters required. May be null if none are used.
+     * @param mapResult Function that takes the return JSON and converts it to an object of type R
+     * @param id ID field of the given object to update.
+     * @param positionalArgs Any positional arguments required by the function.
+     * @return a valid instance of type R
+     * @throws IOException any issues with the Inputs, HTTP errors, or mapping the result.
+     */
+    public <R> R update(String method,
+                          ThrowingSupplier<Map<String,Object>> supplyNamed, ThrowingFunction<JsonNode,R> mapResult, long id, Object... positionalArgs) throws IOException {
         if (id <= 0) {
             throw new IOException("Cannot update TestCase without ID.");
         }
         List<Object> positional = new ArrayList<>();
         positional.add(id);
-        if (mapPositional != null) {
-            positional.addAll(mapPositional.apply(obj));
+        for (Object arg: positionalArgs) {
+            positional.add(arg);
         }
-        Map<String,Object> named = mapNamed != null ? mapNamed.apply(obj) : null;
+        Map<String,Object> named = supplyNamed != null ? supplyNamed.get() : null;
         JSONRPC2Request rpcReq = createRequest("TestCase.update", positional, named);
         JSONRPC2Response response = rpcRequest(rpcReq);
         JsonNode node = jsonMapper.readTree(response.getResult().toString());
         return mapResult.apply(node);
     }
 
+    /**
+     * Call a KiwiTCMS JSON RPC method responsible for performing an update, returning nothing.
+     * @param method JSON RPC Method to be called.
+     * @param query JSON RPC query parameters. Same style of query as {@see filter}.
+     * @throws IOException
+     */
     public void remove(String method, Map<String,String> query) throws IOException {
         JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(query));
         rpcRequest(rpcReq);
