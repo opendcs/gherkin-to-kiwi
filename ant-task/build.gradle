@@ -1,0 +1,9 @@
+plugins
+{
+    id 'opendcs-kiwi.deps-conventions'
+    id 'opendcs-kiwi.java-conventions'
+}
+
+dependencies {
+    implementation(libs.ant)
+}
