@@ -1,4 +1,4 @@
-@GUI
+@Kiwi.Plan(Check Decodes Platform List,Acceptance)
 Feature: Platform List Tab
 
     Background: Basic Setup

@@ -92,6 +92,14 @@ public class TestCaseGenerator
             return kiwiCases;
     }
 
+    public List<TestCase> generateCases(List<Path> paths) throws IOException {
+        List<TestCase> cases = new ArrayList<>();
+        for(Path path: paths) {
+            cases.addAll(generateCases(path));
+        }
+        return cases;
+    }
+
 
     public static void main (String args[])
     {
