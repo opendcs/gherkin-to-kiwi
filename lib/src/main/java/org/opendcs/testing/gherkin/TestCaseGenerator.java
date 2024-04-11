@@ -16,6 +16,8 @@ import org.opendcs.testing.kiwi.Component;
 import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.testing.rpc.TestCaseRpc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.cucumber.gherkin.GherkinParser;
 
@@ -25,7 +27,7 @@ import io.cucumber.messages.types.PickleStepType;
 
 public class TestCaseGenerator 
 {
-
+    private final static Logger log = LoggerFactory.getLogger(TestCaseGenerator.class);
     GherkinParser parser;
     final String product;
 
@@ -49,7 +51,9 @@ public class TestCaseGenerator
             {
                 e.getGherkinDocument().ifPresent(gd ->
                 {
-                    System.out.println(gd.getUri().orElse("no uri"));
+                    if (log.isTraceEnabled()) {
+                        log.trace(gd.getUri().orElse("no uri"));
+                    }
                     gd.getFeature().ifPresent(f ->
                     {
                         currentFeature.set(f.getName());

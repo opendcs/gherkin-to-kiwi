@@ -5,6 +5,7 @@ okhttp = "4.12.0"
 fasterxml = "2.17.0"
 ant = "1.10.12"
 junit = "5.10.2"
+slf4j = "2.0.12"
 
 [libraries]
 gherkin = { module = "io.cucumber:gherkin", version.ref="gherkin" }
@@ -13,6 +14,8 @@ okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref="okhttp" }
 fasterxml-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "fasterxml" }
 fasterxml-jackson-databind = { module ="com.fasterxml.jackson.core:jackson-databind", version.ref = "fasterxml" }
 ant = { module = "org.apache.ant:ant", version.ref = "ant" }
+slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }

@@ -36,9 +36,7 @@ public class GherkinKiwiTask extends Task {
     }
 
     public void setUrl(String url) {
-        String tmp = getProject().getUserProperty(url);
-        this.url = tmp != null ? tmp : url;
-        
+        this.url = url;
     }
 
     public void setUsername(String username) {
@@ -56,15 +54,36 @@ public class GherkinKiwiTask extends Task {
     @Override
     public void init() throws BuildException {
         this.proj = getProject();
+        
+    }
+
+    public void validate_settings() throws BuildException {
         if (this.projectName == null) {
             this.projectName = proj.getName();
+        }
+
+        if (url == null) {
+            throw new BuildException("'url' attribute must be set", getLocation());
+        }
+
+        if (username == null) {
+            throw new BuildException("'username' attribute must be set", getLocation());
+        }
+
+        if (password == null) {
+            throw new BuildException("'password' attribute must be set", getLocation());
+        }
+
+        if (files == null) { 
+            throw new BuildException("A nested FileSet must be provided.", getLocation());
         }
     }
 
     @Override
     public void execute() throws BuildException {
+        validate_settings();
         final TestCaseGenerator tcg = new TestCaseGenerator(projectName);
-        proj.log("Hello, creating test cases for '" + projectName + "' at url '" + url + "'");
+        System.out.println("Creating test cases for '" + projectName + "' at url '" + url + "'");
         ThrowingFunction<Resource,Stream<TestCase>> mapCases = r -> {
             List<TestCase> cases = tcg.generateCases(new File(r.getName()).toPath());
             if (cases.isEmpty()) {
@@ -81,6 +100,6 @@ public class GherkinKiwiTask extends Task {
              // any failure will abruptly end the processing.
              .flatMap(r -> r.getSuccess())
              .collect(Collectors.toList());
-        cases.forEach(System.out::println);
+        cases.forEach(tc -> proj.log(this,tc.toString(), Project.MSG_INFO));
     }
 }
