@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.opendcs.testing.kiwi.Component;
 import org.opendcs.testing.kiwi.TestCase;
+import org.opendcs.testing.kiwi.TestUtils;
 import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.testing.rpc.TestCaseRpc;
 import org.slf4j.Logger;
@@ -103,47 +104,8 @@ public class TestCaseGenerator
             final String password = args[2];
             KiwiClient client = new KiwiClient(url, user, password);
 
-            generator.generateCases(path)
-                     .forEach(tc ->
-                     {
-                        try
-                        {
-                            System.out.println("Pushing " + tc + " To kiwi");
-                            String marker = tc.getProperty("marker");
-
-                            TestCaseRpc rpc = client.testcase();
-
-                            Map<String,String> query = new HashMap<>();
-                            query.put("name", "marker");
-                            query.put("value", marker);
-                            long id = rpc.properties(query)
-                                         .stream()
-                                         .map(e -> e.caseId)
-                                         .findFirst()
-                                         .orElse(-1L);
-                            if (id == -1)
-                            {
-                                TestCase tcOut = client.testcase().create(tc);
-                                long idOut = tcOut.getId();
-                                client.testcase().add_property(idOut, "marker", marker);
-                                for (Component c: tc.getComponents()) {
-                                    client.testcase().add_component(idOut, c, true); 
-                                }
-                                System.out.println("Created test, id =" + idOut);
-                            }
-                            else
-                            {
-                                System.out.println("Updating test case. id = " + id);
-                                client.testcase().update(id, tc);
-                            }
-                        }
-                        catch (IOException ex)
-                        {
-                            System.out.println("Unable to push case to kiwi.");
-                            ex.printStackTrace();
-                        }
-                     });
-
+            List<TestCase> cases = generator.generateCases(path);
+            TestUtils.saveTestCases(cases, client);
         }
         catch (IOException e)
         {

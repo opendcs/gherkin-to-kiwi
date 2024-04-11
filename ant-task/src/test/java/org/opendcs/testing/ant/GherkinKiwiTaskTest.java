@@ -22,7 +22,9 @@ public class GherkinKiwiTaskTest {
         proj.setBaseDir(new File("."));
         ProjectHelper helper = ProjectHelper.getProjectHelper();
         proj.addReference("ant.projectHelper", helper);
-        proj.setUserProperty("kiwi.url", "test");
+        proj.setUserProperty("kiwi.url", System.getProperty("kiwi.url"));
+        proj.setUserProperty("kiwi.username", System.getProperty("kiwi.user"));
+        proj.setUserProperty("kiwi.password", System.getProperty("kiwi.password"));
         helper.parse(proj, buildFile);
         proj.executeTarget(proj.getDefaultTarget());
     }

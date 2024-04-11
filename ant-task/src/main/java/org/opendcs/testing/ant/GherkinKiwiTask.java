@@ -15,6 +15,8 @@ import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Resource;
 import org.opendcs.testing.gherkin.TestCaseGenerator;
 import org.opendcs.testing.kiwi.TestCase;
+import org.opendcs.testing.kiwi.TestUtils;
+import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.util.ThrowingFunction;
 import org.opendcs.util.FailableResult;
 
@@ -101,5 +103,13 @@ public class GherkinKiwiTask extends Task {
              .flatMap(r -> r.getSuccess())
              .collect(Collectors.toList());
         cases.forEach(tc -> proj.log(this,tc.toString(), Project.MSG_INFO));
+
+        try {
+            final KiwiClient client = new KiwiClient(url, username, password);
+            TestUtils.saveTestCases(cases, client);
+        } catch (IOException ex) {
+            throw new BuildException("Problem communicating with KiwiTCMS instance", ex, getLocation());
+        }
+
     }
 }
