@@ -6,6 +6,7 @@ fasterxml = "2.17.0"
 ant = "1.10.12"
 junit = "5.10.2"
 slf4j = "2.0.12"
+test-containers = "1.19.7"
 
 [libraries]
 gherkin = { module = "io.cucumber:gherkin", version.ref="gherkin" }
@@ -21,6 +22,10 @@ junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.re
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
 
+test-containers = { module = "org.testcontainers:testcontainers", version.ref = "test-containers" }
+test-containers-jupiter = { module ="org.testcontainers:junit-jupiter", version.ref = "test-containers" }
+
 [bundles]
 fasterxml-json = ["fasterxml-jackson-core", "fasterxml-jackson-databind"]
 junit = ["junit-jupiter-api", "junit-jupiter-params", "junit-jupiter-engine"]
+test-containers = ["test-containers", "test-containers-jupiter"]
