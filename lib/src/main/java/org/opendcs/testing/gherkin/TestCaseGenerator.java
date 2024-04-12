@@ -41,20 +41,27 @@ public class TestCaseGenerator
                               .build();
     }
 
-    public Stream<FailableResult<TestCase,ParseError>> generateCases(Path path)
+    public Stream<FailableResult<TestCase,ProcessingError>> generateCases(Path path)
     {
         final AtomicReference<String> currentFeature = new AtomicReference<>();
         Predicate<FailableResult<TestCase,ParseError>> excludeNull = r -> r != null;
         try {
             return parser.parse(path)
-              .map(e -> createOrSetError(e, currentFeature, product))
-            .filter(excludeNull);
-        } catch (IOException e) {
-            return Stream.of(FailableResult.failure(new ParseError(SourceReference.of(path.toUri().toString()), e.getLocalizedMessage())));
+                         .map(e -> createOrSetError(e, currentFeature, product))
+                         .filter(excludeNull)
+                         .map(fr -> {
+                            if (fr.isSuccess()) {
+                                return FailableResult.success(fr.getSuccess());
+                            } else {
+                                return FailableResult.failure(new ProcessingError(fr.getFailure().getMessage()));
+                            }
+                         });
+        } catch (IOException ex) {
+            return Stream.of(FailableResult.failure(new ProcessingError("Unable to process "+ path.toUri().toString(), ex)));
         }
     }
 
-    public Stream<FailableResult<TestCase,ParseError>> generateCases(List<Path> paths) throws IOException {
+    public Stream<FailableResult<TestCase,ProcessingError>> generateCases(List<Path> paths) throws IOException {
         return paths.stream()
              .flatMap(p -> generateCases(p));
     }

@@ -88,8 +88,14 @@ public class GherkinKiwiTask extends Task {
         System.out.println("Creating test cases for '" + projectName + "' at url '" + url + "'");
         ThrowingFunction<Resource,Stream<TestCase>> mapCases = r -> {
             return tcg.generateCases(new File(r.getName()).toPath())
-                      .peek(fr -> fr.handleError(ex -> {
-                        throw new BuildException("Unable to process feature file", ex);
+                      .peek(fr -> fr.handleError(err -> {
+                            if (err.getMessage() != null && err.getCause() != null) {
+                                throw new BuildException(err.getMessage(), err.getCause());
+                            } else if (err.getCause() != null) {
+                                throw new BuildException("Unable to process feature file", err.getCause());
+                            } else {
+                                throw new BuildException(err.getMessage());
+                            }
                       }))
                       .map(fr -> fr.getSuccess());
         };
@@ -101,6 +107,7 @@ public class GherkinKiwiTask extends Task {
                 )
              // any failure will abruptly end the processing.
              .flatMap(r -> r.getSuccess())
+             .peek(System.out::println)
              .collect(Collectors.toList());
         cases.forEach(tc -> proj.log(this,tc.toString(), Project.MSG_INFO));
 
