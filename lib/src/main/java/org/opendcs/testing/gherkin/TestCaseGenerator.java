@@ -50,6 +50,9 @@ public class TestCaseGenerator
         parser.parse(path)
               .forEach(e ->
             {
+                e.getParseError().ifPresent(error -> {
+                    System.out.println(error.getMessage());
+                });
                 e.getGherkinDocument().ifPresent(gd ->
                 {
                     if (log.isTraceEnabled()) {
@@ -104,16 +107,19 @@ public class TestCaseGenerator
     public static void main (String args[])
     {
         Path path = Paths.get("src/test/resources/feature-files/PlatformListSorting.feature");
+        System.out.println(path.toFile().exists());
         TestCaseGenerator generator = new TestCaseGenerator("OpenDCS");
         try
         {
             final String url = args[0];
             final String user = args[1];
             final String password = args[2];
-            KiwiClient client = new KiwiClient(url, user, password);
+            //KiwiClient client = new KiwiClient(url, user, password);
 
             List<TestCase> cases = generator.generateCases(path);
-            TestUtils.saveTestCases(cases, client);
+            System.out.println("Got " + cases.size() + " test cases.");
+            cases.forEach(System.out::println);
+            //TestUtils.saveTestCases(cases, client);
         }
         catch (IOException e)
         {

@@ -1,0 +1,7 @@
+{
+    "plans": [
+        "id": "Check Decodes Platform List",
+        "name": "Check Decodes Platform List",
+        "type": "Acceptance"
+    ]
+}
