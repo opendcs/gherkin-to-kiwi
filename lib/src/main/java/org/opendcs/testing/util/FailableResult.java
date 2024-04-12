@@ -1,4 +1,4 @@
-package org.opendcs.util;
+package org.opendcs.testing.util;
 
 import java.util.function.Consumer;
 

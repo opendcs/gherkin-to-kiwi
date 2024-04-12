@@ -17,8 +17,8 @@ import org.opendcs.testing.gherkin.TestCaseGenerator;
 import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.kiwi.TestUtils;
 import org.opendcs.testing.rpc.KiwiClient;
-import org.opendcs.util.ThrowingFunction;
-import org.opendcs.util.FailableResult;
+import org.opendcs.testing.util.FailableResult;
+import org.opendcs.testing.util.ThrowingFunction;
 
 public class GherkinKiwiTask extends Task {
 
@@ -87,11 +87,11 @@ public class GherkinKiwiTask extends Task {
         final TestCaseGenerator tcg = new TestCaseGenerator(projectName);
         System.out.println("Creating test cases for '" + projectName + "' at url '" + url + "'");
         ThrowingFunction<Resource,Stream<TestCase>> mapCases = r -> {
-            List<TestCase> cases = tcg.generateCases(new File(r.getName()).toPath());
-            if (cases.isEmpty()) {
-                throw new IOException("No test cases in feature file: " + r.getName());
-            }
-            return cases.stream();
+            return tcg.generateCases(new File(r.getName()).toPath())
+                      .peek(fr -> fr.handleError(ex -> {
+                        throw new BuildException("Unable to process feature file", ex);
+                      }))
+                      .map(fr -> fr.getSuccess());
         };
         List<TestCase> cases = files.stream()
              .map(ThrowingFunction.wrap(mapCases))

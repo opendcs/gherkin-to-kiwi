@@ -1,11 +1,17 @@
 package org.opendcs.testing.util;
 
-import java.io.IOException;
+import java.util.function.Function;
 
-/**
- * A Function interface for functions that may need to throw an IOException
- */
-@FunctionalInterface
-public interface ThrowingFunction<A,R> {
-    R apply(A a) throws IOException;
-}
+public interface ThrowingFunction<ArgType,ResultType> {
+    ResultType apply(ArgType a) throws Throwable;
+
+    public static <ResultType,ArgType> Function<ArgType,FailableResult<ResultType,Throwable>> wrap(ThrowingFunction<ArgType,ResultType> func) {
+        return arg -> {
+            try {
+                return FailableResult.success(func.apply(arg));
+            } catch (Throwable t) {
+                return FailableResult.failure(t);
+            }
+        };
+    }
+} 

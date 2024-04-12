@@ -255,7 +255,15 @@ public final class KiwiClient {
             JSONRPC2Response response = rpcRequest(rpcReq);
             String jsonString = response.getResult().toString();
             JsonNode node = jsonMapper.readTree(jsonString);
-            return mapResult.apply(node);
+            try {
+                return mapResult.apply(node);
+            } catch (Throwable ex) {
+                if (ex instanceof IOException) {
+                    throw (IOException)ex;
+                } else {
+                    throw new IOException(ex);
+                }
+            }
     }
 
     /**
@@ -274,8 +282,16 @@ public final class KiwiClient {
         String jsonString = response.getResult().toString();
         JsonNode node = jsonMapper.readTree(jsonString);
         for(JsonNode e: node) {
-            R item = mapResult.apply(e);
-            items.add(item);
+            try {
+                R item = mapResult.apply(e);
+                items.add(item);
+            } catch (Throwable ex) {
+                if (ex instanceof IOException) {
+                    throw (IOException)ex;
+                } else {
+                    throw new IOException(ex);
+                }
+            }
         }
         return items;
     }
@@ -305,7 +321,15 @@ public final class KiwiClient {
         JSONRPC2Request rpcReq = createRequest("TestCase.update", positional, named);
         JSONRPC2Response response = rpcRequest(rpcReq);
         JsonNode node = jsonMapper.readTree(response.getResult().toString());
-        return mapResult.apply(node);
+        try {
+            return mapResult.apply(node);
+        } catch (Throwable ex) {
+            if (ex instanceof IOException) {
+                throw (IOException)ex;
+            } else {
+                throw new IOException(ex);
+            }
+        }
     }
 
     /**
