@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,9 +18,11 @@ import org.apache.tools.ant.types.Resource;
 import org.opendcs.testing.PlanDefinition;
 import org.opendcs.testing.gherkin.TestCaseGenerator;
 import org.opendcs.testing.gherkin.TestPlanGenerator;
+import org.opendcs.testing.kiwi.Product;
 import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.kiwi.TestPlan;
 import org.opendcs.testing.kiwi.TestUtils;
+import org.opendcs.testing.kiwi.Version;
 import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.testing.util.FailableResult;
 import org.opendcs.testing.util.ThrowingFunction;
@@ -143,6 +146,9 @@ public class GherkinKiwiTask extends Task {
         
         try {
             final KiwiClient client = new KiwiClient(url, username, password);
+
+            create_version(client);
+
             Stream<TestCase> casesWithId = TestUtils.saveTestCases(cases, client)
                                                     .peek(fr -> fr.handleError(ex ->
                                                                     { 
@@ -167,5 +173,15 @@ public class GherkinKiwiTask extends Task {
             throw new BuildException("Problem communicating with KiwiTCMS instance", ex, getLocation());
         }
 
+    }
+
+    private void create_version(KiwiClient client) throws IOException {
+        Map<String,String> query = new HashMap<>();
+        query.put("value", version);
+        query.put("product__name", projectName);
+        if (!client.version().filter(query).stream().findFirst().isPresent()) {
+            Version v = Version.of(version, Product.of(projectName));
+            client.version().create(v);
+        }
     }
 }

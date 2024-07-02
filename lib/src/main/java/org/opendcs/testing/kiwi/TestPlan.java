@@ -9,12 +9,12 @@ public class TestPlan {
     private final String name;
     private final long id;
     private final Product product;
-    private final String version;
+    private final Version version;
     private final Type type;
     private final List<TestCase> cases;
     
 
-    private TestPlan(long id, String name, Product product, String version, Type type, List<TestCase> cases) {
+    private TestPlan(long id, String name, Product product, Version version, Type type, List<TestCase> cases) {
         this.id = id;
         this.name = name;
         this.product = product;
@@ -35,7 +35,7 @@ public class TestPlan {
         return product;
     }
 
-    public String getVersion() {
+    public Version getVersion() {
         return version;
     }
 
@@ -73,9 +73,9 @@ public class TestPlan {
         private long id = -1;
         private String name = null;
         private Product product = null;
-        private String version = null;
         private Type type = null;
         private List<TestCase> cases = new ArrayList<>();
+        private Version version = null;
 
         public Builder() {
 
@@ -105,8 +105,13 @@ public class TestPlan {
             return this;
         }
 
-        public Builder withVersion(String version) {
+        public Builder withVersion(Version version) {
             this.version = version;
+            return this;
+        }
+
+        public Builder withVersion(String name) {
+            this.version = Version.of(name, this.product);
             return this;
         }
 
@@ -126,7 +131,7 @@ public class TestPlan {
         }
 
         public TestPlan build() {
-            return new TestPlan(id, name, product, version, type, cases);
+            return new TestPlan(id, name, product, Version.of(version.name, product), type, cases);
         }
     }
 }

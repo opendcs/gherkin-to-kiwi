@@ -97,17 +97,37 @@ public class TestPlanRpc
         }
         
         planMap.put("product", productId);
-        planMap.put("product_version", 1);
+
+        long versionId = plan.getVersion().id;
+        if (versionId == -1L)
+        {
+            Map<String,String> query = new HashMap<>();
+            query.put("product", ""+productId);
+            query.put("value", plan.getVersion().name);
+            versionId = client.version()
+                              .filter(query)
+                              .stream()
+                              .map(e -> e.id)
+                              .findFirst()
+                              .orElseThrow(
+                                () -> new IOException("Unable to retrieve version "
+                                                     + plan.getVersion().name
+                                                     + " and product "
+                                                     + plan.getVersion().product.name));
+        }
+        planMap.put("product_version", versionId);
         return planMap;
     }
 
-    public static TestPlan fillTestPlan(JsonNode node, KiwiClient client ) throws IOException
+    public static TestPlan fillTestPlan(JsonNode node, KiwiClient client) throws IOException
     {
+        System.out.println(node.toPrettyString());
         TestPlan.Builder tpb = new TestPlan.Builder();
         tpb.withId(node.get("id").asLong())
            .withName(node.get("name").asText())
            .withType(node.get("type").asText())
            .withProduct(client.product().byId(node.get("product").asLong()))
+           .withVersion(client.version().byId(node.get("product_version").asLong()));
             ;
         return tpb.build();
     }
