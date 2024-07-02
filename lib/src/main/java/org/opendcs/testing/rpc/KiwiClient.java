@@ -48,6 +48,7 @@ public final class KiwiClient {
     private final ProductRpc productRpc;
     private final PriorityRpc priorityRpc;
     private final CategoryRpc categoryRpc;
+    private final TestPlanRpc testPlanRpc;
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
     public KiwiClient(String url, String username, String password) throws IOException {
@@ -101,6 +102,7 @@ public final class KiwiClient {
             productRpc = new ProductRpc(this);
             priorityRpc = new PriorityRpc(this);
             categoryRpc = new CategoryRpc(this);
+            testPlanRpc = new TestPlanRpc(this);
         } catch (Exception ex) {
             throw new IOException("Trust creation error.", ex);
         }
@@ -112,6 +114,14 @@ public final class KiwiClient {
      */
     public TestCaseRpc testcase() {
         return testCaseRpc;
+    }
+
+    /**
+     * Retrieve RPC for test plan operations;
+     * @return
+     */
+    public TestPlanRpc testplan() {
+        return testPlanRpc;
     }
 
     /**
@@ -318,7 +328,7 @@ public final class KiwiClient {
             positional.add(arg);
         }
         Map<String,Object> named = supplyNamed != null ? supplyNamed.get() : null;
-        JSONRPC2Request rpcReq = createRequest("TestCase.update", positional, named);
+        JSONRPC2Request rpcReq = createRequest(method, positional, named);
         JSONRPC2Response response = rpcRequest(rpcReq);
         JsonNode node = jsonMapper.readTree(response.getResult().toString());
         try {
@@ -340,6 +350,11 @@ public final class KiwiClient {
      */
     public void remove(String method, Map<String,String> query) throws IOException {
         JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(query));
+        rpcRequest(rpcReq);
+    }
+
+    public void remove(String method, Object... args) throws IOException {
+        JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(args));
         rpcRequest(rpcReq);
     }
 }

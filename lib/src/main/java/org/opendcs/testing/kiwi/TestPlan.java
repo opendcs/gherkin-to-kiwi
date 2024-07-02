@@ -47,6 +47,10 @@ public class TestPlan {
         return Collections.unmodifiableList(cases);
     }
 
+    public TestPlan.Builder newBuilder() {
+        return new Builder(this);
+    }
+
     @Override
     public String toString()
     {
@@ -72,6 +76,19 @@ public class TestPlan {
         private String version = null;
         private String type = null;
         private List<TestCase> cases = new ArrayList<>();
+
+        public Builder() {
+
+        }
+
+        public Builder(TestPlan tp) {
+            this.id = tp.id;
+            this.name = tp.name;
+            this.product = tp.product;
+            this.version = tp.version;
+            this.type = tp.type;
+            this.cases.addAll(tp.getCases());
+        }
 
         public Builder withId(long id) {
             this.id = id;

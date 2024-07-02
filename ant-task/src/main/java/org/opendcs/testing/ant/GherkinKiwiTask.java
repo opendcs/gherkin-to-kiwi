@@ -131,7 +131,7 @@ public class GherkinKiwiTask extends Task {
         List<TestCase> cases = files.stream()
              .map(ThrowingFunction.wrap(mapCases))
              .peek(r -> r.handleError(ex -> {
-                    throw new BuildException("Unable to process feature file", ex);
+                    throw new BuildException("Unable to process feature file.", ex);
                 })
                 )
              // any failure will abruptly end the processing.
@@ -146,14 +146,23 @@ public class GherkinKiwiTask extends Task {
             Stream<TestCase> casesWithId = TestUtils.saveTestCases(cases, client)
                                                     .peek(fr -> fr.handleError(ex ->
                                                                     { 
-                                                                        throw new BuildException("Unable to process save case", ex);
+                                                                        throw new BuildException("Unable to process save case.", ex);
                                                                     })
                                                     )
                                                     .map(r -> r.getSuccess())
                                                     .peek(System.out::println);
 
             Stream<TestPlan> plans = TestPlanGenerator.generateTestPlans(casesWithId, planDefinitions, version);
-            plans.peek(System.out::println).forEach(tp -> proj.log(this, tp.toString(), Project.MSG_INFO));
+
+            Stream<TestPlan> plansWithId = TestUtils.saveTestPlans(plans, client)
+                                                    .peek(fr -> fr.handleError(ex ->
+                                                          {
+                                                            throw new BuildException("Unable to process saving a test plan.", ex);
+                                                          }))
+                                                    .map(r -> r.getSuccess())
+                                                    .peek(System.out::println);
+                                           ;
+            plansWithId.forEach(tp -> proj.log(this, tp.toString(), Project.MSG_INFO));
         } catch (IOException ex) {
             throw new BuildException("Problem communicating with KiwiTCMS instance", ex, getLocation());
         }

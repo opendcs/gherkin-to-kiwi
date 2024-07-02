@@ -141,7 +141,7 @@ public final class TestCaseRpc {
         return params;
     }
 
-    private static TestCase fillTestCase(JsonNode node, KiwiClient client) throws IOException {
+    public static TestCase fillTestCase(JsonNode node, KiwiClient client) throws IOException {
         Map<String,String> query = new HashMap<>();
         query.put("id", node.get("category").asText());
         Category category = client.category().filter(query).stream().findFirst().get();

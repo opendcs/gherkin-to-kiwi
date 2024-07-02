@@ -19,6 +19,11 @@ public class Product {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        return "Product{id="+id+",name="+name +"}";
+    }
+
     public static Product of(long id, String name) {
         return products.computeIfAbsent(id, key -> new Product(id, name));
     }

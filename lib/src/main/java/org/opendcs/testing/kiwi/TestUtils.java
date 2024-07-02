@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.testing.rpc.TestCaseRpc;
+import org.opendcs.testing.rpc.TestPlanRpc;
 import org.opendcs.testing.util.FailableResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,45 @@ public class TestUtils {
         {
             return FailableResult.failure(ex);
         }
+    }
+
+
+    public static Stream<FailableResult<TestPlan,IOException>> saveTestPlans(Stream<TestPlan> plans, KiwiClient client)
+    {
+        return plans.map(tp -> saveTestPlan(tp, client));
+    }
+
+    private static FailableResult<TestPlan,IOException> saveTestPlan(TestPlan plan, KiwiClient client)
+    {
+        try
+        {
+            TestPlanRpc rpc = client.testplan();
+            Map<String,String> query = new HashMap<>();
+            query.put("name",plan.getName());
+            long id = rpc.filter(query).stream().map(e -> e.getId()).findFirst().orElse(-1L);
+            if (id == -1L)
+            {
+                TestPlan tpOut = rpc.create(plan);
+                long idOut = tpOut.getId();
+                id = idOut;
+            }
+            else
+            {
+                rpc.update(id, plan);
+                // TODO: removing existing cases
+
+            }
+            for (TestCase tc: plan.getCases())
+            {
+                rpc.add_test_case(id, tc.getId());
+            }
+            return FailableResult.success(plan.newBuilder().withId(id).build());
+        }
+        catch (IOException ex)
+        {
+            return FailableResult.failure(ex);
+        }
+
     }
     
 }
