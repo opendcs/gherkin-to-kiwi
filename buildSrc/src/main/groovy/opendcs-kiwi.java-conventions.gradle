@@ -19,10 +19,12 @@ java {
 compileJava {
     sourceCompatibility = "1.8"
     targetCompatibility = "1.8"
+    options.compilerArgs << '-parameters'
 }
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
+    options.compilerArgs << '-parameters'
 }
 
 test {

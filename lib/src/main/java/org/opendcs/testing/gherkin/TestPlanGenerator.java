@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.opendcs.testing.PlanDefinition;
 import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.kiwi.TestPlan;
 import org.opendcs.testing.kiwi.tags.KiwiTag;
@@ -18,7 +19,7 @@ public class TestPlanGenerator {
      * @param cases
      * @return TestPlan objects ready to be saved to kiwi
      */
-    public static Collection<TestPlan.Builder> generateTestPlans(List<TestCase> cases) {
+    public static Stream<TestPlan> generateTestPlans(List<TestCase> cases, Map<String,PlanDefinition> planDefinitions, String version) {
         final Map<String,TestPlan.Builder> plans = new HashMap<>();
         
         for (TestCase tc: cases) {
@@ -29,9 +30,13 @@ public class TestPlanGenerator {
                                        .withProduct(tc.getProduct());
                 });
                 builder.withTest(tc);
+                PlanDefinition pd = planDefinitions.get(pt.planName);
+                builder.withType(pd.type);
+                builder.withName(pd.name);
+                builder.withVersion(version);
             });
         }
-        return plans.values(); 
+        return plans.values().stream().map(TestPlan.Builder::build);
     }
 
 

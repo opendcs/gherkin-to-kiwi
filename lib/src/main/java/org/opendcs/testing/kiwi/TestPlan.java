@@ -3,6 +3,7 @@ package org.opendcs.testing.kiwi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestPlan {
     private final String name;
@@ -44,6 +45,24 @@ public class TestPlan {
 
     public List<TestCase> getCases() {
         return Collections.unmodifiableList(cases);
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder("testplan{");
+        sb.append("Id=").append(getId()).append(",");
+        sb.append("Name=").append(getName()).append(",");
+        sb.append("Version=").append(getVersion()).append(",");
+        sb.append("Product=").append(getProduct().name).append(",");
+        sb.append("Type=").append(getType()).append(",");
+        sb.append("Cases=")
+          .append(
+            cases.stream()
+                 .map(tc -> tc.getSummary())
+                 .collect(Collectors.joining(","))
+        );
+        return sb.append("}").toString();
     }
 
     public static class Builder {

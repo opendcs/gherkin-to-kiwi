@@ -7,11 +7,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.opendcs.testing.PlanDefinition;
 import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.util.FailableResult;
 import org.slf4j.Logger;
@@ -115,7 +118,7 @@ public class TestCaseGenerator
     }
 
 
-    public static void main (String args[])
+    public static void main (String args[]) throws Exception
     {
         Path path = Paths.get("src/test/resources/feature-files/PlatformListSorting.feature");
         System.out.println(path.toFile().exists());
@@ -125,13 +128,20 @@ public class TestCaseGenerator
         final String password = args[2];
         //KiwiClient client = new KiwiClient(url, user, password);
 
-        generator.generateCases(path)
+        List<TestCase> cases = generator.generateCases(path)
                  .peek(ftc -> ftc.handleError(ex -> {
                     System.out.println(ex.getMessage());
                   }))
                  .filter(ftc -> ftc.isSuccess())
                  .map(ftc -> ftc.getSuccess())
-                .forEach(System.out::println);
+                 .peek(System.out::println)
+                 .collect(Collectors.toList());
+        
+        Path plans = Paths.get("src/test/resources/plans.kiwi");
+        Map<String, PlanDefinition> planDefinitions = PlanDefinition.from(plans);
+
+        TestPlanGenerator.generateTestPlans(cases, planDefinitions,"test")
+                     .forEach(System.out::println);
         //TestUtils.saveTestCases(cases, client);
     }
 }
