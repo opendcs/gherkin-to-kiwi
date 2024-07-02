@@ -7,6 +7,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,6 +18,7 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Resource;
 import org.opendcs.testing.PlanDefinition;
+import org.opendcs.testing.gherkin.ProcessingError;
 import org.opendcs.testing.gherkin.TestCaseGenerator;
 import org.opendcs.testing.gherkin.TestPlanGenerator;
 import org.opendcs.testing.kiwi.Product;
@@ -116,72 +119,32 @@ public class GherkinKiwiTask extends Task {
     @Override
     public void execute() throws BuildException {
         validate_settings();
-        final TestCaseGenerator tcg = new TestCaseGenerator(projectName);
-        System.out.println("Creating test cases for '" + projectName + "' at url '" + url + "'");
-        ThrowingFunction<Resource,Stream<TestCase>> mapCases = r -> {
-            return tcg.generateCases(new File(r.getName()).toPath())
-                      .peek(fr -> fr.handleError(err -> {
-                            if (err.getMessage() != null && err.getCause() != null) {
-                                throw new BuildException(err.getMessage(), err.getCause());
-                            } else if (err.getCause() != null) {
-                                throw new BuildException("Unable to process feature file", err.getCause());
-                            } else {
-                                throw new BuildException(err.getMessage());
-                            }
-                      }))
-                      .map(fr -> fr.getSuccess());
-        };
-        List<TestCase> cases = files.stream()
-             .map(ThrowingFunction.wrap(mapCases))
-             .peek(r -> r.handleError(ex -> {
-                    throw new BuildException("Unable to process feature file.", ex);
-                })
-                )
-             // any failure will abruptly end the processing.
-             .flatMap(r -> r.getSuccess())
-             .peek(System.out::println)
-             .collect(Collectors.toList());
-        cases.forEach(tc -> proj.log(this, tc.toString(), Project.MSG_INFO));
-
-        
-        try {
+        try
+        {
             final KiwiClient client = new KiwiClient(url, username, password);
-
-            create_version(client);
-
-            Stream<TestCase> casesWithId = TestUtils.saveTestCases(cases, client)
-                                                    .peek(fr -> fr.handleError(ex ->
-                                                                    { 
-                                                                        throw new BuildException("Unable to process save case.", ex);
-                                                                    })
-                                                    )
-                                                    .map(r -> r.getSuccess())
-                                                    .peek(System.out::println);
-
-            Stream<TestPlan> plans = TestPlanGenerator.generateTestPlans(casesWithId, planDefinitions, version);
-
-            Stream<TestPlan> plansWithId = TestUtils.saveTestPlans(plans, client)
-                                                    .peek(fr -> fr.handleError(ex ->
-                                                          {
-                                                            throw new BuildException("Unable to process saving a test plan.", ex);
-                                                          }))
-                                                    .map(r -> r.getSuccess())
-                                                    .peek(System.out::println);
-                                           ;
-            plansWithId.forEach(tp -> proj.log(this, tp.toString(), Project.MSG_INFO));
-        } catch (IOException ex) {
-            throw new BuildException("Problem communicating with KiwiTCMS instance", ex, getLocation());
+            System.out.println("Creating test cases for '" + projectName + "' at url '" + url + "'");
+            Consumer<ProcessingError> onError = 
+                err -> {
+                    if (err.getMessage() != null && err.getCause() != null) {
+                        throw new BuildException(err.getMessage(), err.getCause());
+                    } else if (err.getCause() != null) {
+                        throw new BuildException("Unable to process feature file", err.getCause());
+                    } else {
+                        throw new BuildException(err.getMessage());
+                    }
+                };
+            TestUtils.processAndSaveData(client,
+                                        projectName,
+                                        version,
+                                        files.stream().map(r -> new File(r.getName()).toPath()),
+                                        planDefinitions,
+                                        obj -> proj.log(GherkinKiwiTask.this, obj.toString(), Project.MSG_INFO),
+                                        onError
+                                        );
         }
-
-    }
-
-    private void create_version(KiwiClient client) throws IOException {
-        Map<String,String> query = new HashMap<>();
-        query.put("value", version);
-        query.put("product__name", projectName);
-        if (!client.version().filter(query).stream().findFirst().isPresent()) {
-            Version v = Version.of(version, Product.of(projectName));
-            client.version().create(v);
+        catch (IOException ex)
+        {
+            throw new BuildException("Unable to connect to Kiwi Client.", ex, getLocation());
         }
     }
 }

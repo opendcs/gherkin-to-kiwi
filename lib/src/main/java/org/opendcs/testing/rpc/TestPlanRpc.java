@@ -121,7 +121,6 @@ public class TestPlanRpc
 
     public static TestPlan fillTestPlan(JsonNode node, KiwiClient client) throws IOException
     {
-        System.out.println(node.toPrettyString());
         TestPlan.Builder tpb = new TestPlan.Builder();
         tpb.withId(node.get("id").asLong())
            .withName(node.get("name").asText())

@@ -61,8 +61,8 @@ public class VersionRpc
         
     }
 
-    public static Version mapVersion(JsonNode node) throws IOException {
-        System.out.println(node.toPrettyString());
+    public static Version mapVersion(JsonNode node) throws IOException
+    {
         Product product = Product.of(node.get("product__name").asText());
         return Version.of(
                     node.get("id").asLong(),
