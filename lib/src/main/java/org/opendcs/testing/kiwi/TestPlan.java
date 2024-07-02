@@ -10,11 +10,11 @@ public class TestPlan {
     private final long id;
     private final Product product;
     private final String version;
-    private final String type;
+    private final Type type;
     private final List<TestCase> cases;
     
 
-    private TestPlan(long id, String name, Product product, String version, String type, List<TestCase> cases) {
+    private TestPlan(long id, String name, Product product, String version, Type type, List<TestCase> cases) {
         this.id = id;
         this.name = name;
         this.product = product;
@@ -39,7 +39,7 @@ public class TestPlan {
         return version;
     }
 
-    public String getType() {
+    public Type getType() {
         return type;
     }
 
@@ -59,7 +59,7 @@ public class TestPlan {
         sb.append("Name=").append(getName()).append(",");
         sb.append("Version=").append(getVersion()).append(",");
         sb.append("Product=").append(getProduct().name).append(",");
-        sb.append("Type=").append(getType()).append(",");
+        sb.append("Type=").append(getType().toString()).append(",");
         sb.append("Cases=")
           .append(
             cases.stream()
@@ -74,7 +74,7 @@ public class TestPlan {
         private String name = null;
         private Product product = null;
         private String version = null;
-        private String type = null;
+        private Type type = null;
         private List<TestCase> cases = new ArrayList<>();
 
         public Builder() {
@@ -111,6 +111,11 @@ public class TestPlan {
         }
 
         public Builder withType(String type) {
+            this.type = Type.of(type);
+            return this;
+        }
+
+        public Builder withType(Type type) {
             this.type = type;
             return this;
         }

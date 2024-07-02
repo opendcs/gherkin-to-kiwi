@@ -76,7 +76,14 @@ public class TestPlanRpc
     {
         Map<String,Object> planMap = new HashMap<>();
         planMap.put("name", plan.getName());
-        planMap.put("type",1); //TODO: type Rpc
+        long typeId = plan.getType().id;
+        if (typeId == -1L) {
+            Map<String,String> query = new HashMap<>();
+            query.put("name", plan.getType().name);
+            typeId = client.type().byName(plan.getType().name).id;
+        }
+
+        planMap.put("type", typeId);
         long productId = plan.getProduct().id;
         if (productId == -1L) {
             Map<String,String> query = new HashMap<>();

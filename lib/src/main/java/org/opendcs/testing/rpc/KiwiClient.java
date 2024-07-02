@@ -49,6 +49,8 @@ public final class KiwiClient {
     private final PriorityRpc priorityRpc;
     private final CategoryRpc categoryRpc;
     private final TestPlanRpc testPlanRpc;
+    private final TypeRpc typeRpc;
+
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
     public KiwiClient(String url, String username, String password) throws IOException {
@@ -103,6 +105,7 @@ public final class KiwiClient {
             priorityRpc = new PriorityRpc(this);
             categoryRpc = new CategoryRpc(this);
             testPlanRpc = new TestPlanRpc(this);
+            typeRpc = new TypeRpc(this);
         } catch (Exception ex) {
             throw new IOException("Trust creation error.", ex);
         }
@@ -154,6 +157,10 @@ public final class KiwiClient {
      */
     public CategoryRpc category() {
         return categoryRpc;
+    }
+
+    public TypeRpc type() {
+        return typeRpc;
     }
 
     /**
