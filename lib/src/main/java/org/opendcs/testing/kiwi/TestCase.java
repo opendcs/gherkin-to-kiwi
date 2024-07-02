@@ -118,7 +118,7 @@ public class TestCase {
 
     @Override
     public String toString() {
-        return "testcase{"
+        return "testcase{Id=" + this.id + ","
              + "Summary=" + this.summary + ","
              + "Product=" + this.product.name + ","
              + "Category=" + this.category.name + ","
@@ -167,10 +167,10 @@ public class TestCase {
             this.notes = tc.notes;
             this.arguments = tc.arguments;
             this.referenceLink = tc.referenceLink;
-            this.status = tc. status;
-            this.attachments = new ArrayList<>(attachments);
-            this.tags = new ArrayList<>(tags);
-            this.components = new ArrayList<>(components);
+            this.status = tc.status;
+            this.attachments = new ArrayList<>(tc.attachments);
+            this.tags = new ArrayList<>(tc.tags);
+            this.components = new ArrayList<>(tc.components);
             this.properties.putAll(tc.properties);
         }
 

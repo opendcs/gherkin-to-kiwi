@@ -1,3 +1,4 @@
+@Kiwi.Plan(Plan1)
 Feature: Test 1
 
     Background: Basic Setup

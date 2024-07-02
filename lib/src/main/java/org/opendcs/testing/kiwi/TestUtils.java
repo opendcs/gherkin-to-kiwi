@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.testing.rpc.TestCaseRpc;
+import org.opendcs.testing.util.FailableResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +17,16 @@ public class TestUtils {
     private TestUtils() {}
 
 
-    public static void saveTestCases(List<TestCase> cases, KiwiClient client) throws IOException {
-        for (TestCase tc: cases) {
+    public static Stream<FailableResult<TestCase,IOException>> saveTestCases(List<TestCase> cases, KiwiClient client) throws IOException {
+        return cases.stream()
+                    .map(tc -> saveCase(tc, client))
+                    ;
+    }
+
+    private static FailableResult<TestCase,IOException> saveCase(TestCase tc, KiwiClient client)
+    {
+        try
+        {
             String marker = tc.getProperty("marker");
 
             TestCaseRpc rpc = client.testcase();
@@ -38,12 +48,18 @@ public class TestUtils {
                     client.testcase().add_component(idOut, c, true); 
                 }
                 log.info("Created test, new id =" + idOut);
+                id = idOut;
             }
             else
             {
                 log.info("Updating test case. id = " + id);
                 client.testcase().update(id, tc);
             }
+            return FailableResult.success(tc.newBuilder().withId(id).build());
+        }
+        catch (IOException ex)
+        {
+            return FailableResult.failure(ex);
         }
     }
     

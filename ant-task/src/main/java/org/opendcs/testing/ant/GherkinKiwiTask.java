@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,8 +14,11 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Resource;
+import org.opendcs.testing.PlanDefinition;
 import org.opendcs.testing.gherkin.TestCaseGenerator;
+import org.opendcs.testing.gherkin.TestPlanGenerator;
 import org.opendcs.testing.kiwi.TestCase;
+import org.opendcs.testing.kiwi.TestPlan;
 import org.opendcs.testing.kiwi.TestUtils;
 import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.testing.util.FailableResult;
@@ -28,6 +32,9 @@ public class GherkinKiwiTask extends Task {
     private String password = null;
     private FileSet files = null;
     private Project proj = null;
+    private String version = null;
+    private Path planDefinitionsFile = null;
+    private Map<String,PlanDefinition> planDefinitions = null;
 
     public GherkinKiwiTask() {
         
@@ -49,6 +56,15 @@ public class GherkinKiwiTask extends Task {
         this.password = password;
     }
 
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public void setPlanDefinitions(String planDefinitionsFile) {
+        this.proj.log(this, "Plan Def File = " + planDefinitionsFile, Project.MSG_INFO);
+        this.planDefinitionsFile = Paths.get(planDefinitionsFile);
+    }
+
     public void addConfiguredFileSet(FileSet files) {
         this.files = files;
     }
@@ -56,7 +72,6 @@ public class GherkinKiwiTask extends Task {
     @Override
     public void init() throws BuildException {
         this.proj = getProject();
-        
     }
 
     public void validate_settings() throws BuildException {
@@ -78,6 +93,20 @@ public class GherkinKiwiTask extends Task {
 
         if (files == null) { 
             throw new BuildException("A nested FileSet must be provided.", getLocation());
+        }
+
+        if (planDefinitionsFile == null) {
+            throw new BuildException("A 'planDefinitions' attribute must be set to a file"
+                                    +" containing a json list of test plan defitions.", getLocation());
+        }
+
+        try
+        {
+            this.planDefinitions = PlanDefinition.from(this.planDefinitionsFile);
+        }
+        catch (IOException ex)
+        {
+            throw new BuildException("Unable to load test plan definitions", ex);
         }
     }
 
@@ -109,11 +138,22 @@ public class GherkinKiwiTask extends Task {
              .flatMap(r -> r.getSuccess())
              .peek(System.out::println)
              .collect(Collectors.toList());
-        cases.forEach(tc -> proj.log(this,tc.toString(), Project.MSG_INFO));
+        cases.forEach(tc -> proj.log(this, tc.toString(), Project.MSG_INFO));
 
+        
         try {
             final KiwiClient client = new KiwiClient(url, username, password);
-            TestUtils.saveTestCases(cases, client);
+            Stream<TestCase> casesWithId = TestUtils.saveTestCases(cases, client)
+                                                    .peek(fr -> fr.handleError(ex ->
+                                                                    { 
+                                                                        throw new BuildException("Unable to process save case", ex);
+                                                                    })
+                                                    )
+                                                    .map(r -> r.getSuccess())
+                                                    .peek(System.out::println);
+
+            Stream<TestPlan> plans = TestPlanGenerator.generateTestPlans(casesWithId, planDefinitions, version);
+            plans.peek(System.out::println).forEach(tp -> proj.log(this, tp.toString(), Project.MSG_INFO));
         } catch (IOException ex) {
             throw new BuildException("Problem communicating with KiwiTCMS instance", ex, getLocation());
         }
