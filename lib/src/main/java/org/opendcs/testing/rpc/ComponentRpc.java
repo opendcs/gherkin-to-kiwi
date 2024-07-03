@@ -11,56 +11,67 @@ import org.opendcs.testing.kiwi.Product;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public final class ComponentRpc {
+public final class ComponentRpc
+{
 
     private final KiwiClient client;
 
-    public ComponentRpc(KiwiClient client) {
+    public ComponentRpc(KiwiClient client)
+    {
         this.client = client;
     }
 
-    public Component create(Component component) throws IOException {
+    public Component create(Component component) throws IOException
+    {
         return client.create("Component.create",
-                             null,
-                             n -> {
-                                return jsonToComponent(n, client);
-                             },
-                             componentElementsToMap(component,client));
+                null,
+                n ->
+                {
+                    return jsonToComponent(n, client);
+                },
+                componentElementsToMap(component, client));
     }
 
-    public Component update(long componentId, Component newComponent) {
+    public Component update(long componentId, Component newComponent)
+    {
         return null;
     }
 
-    public List<Component> filter(Map<String,String> query) throws IOException {
+    public List<Component> filter(Map<String, String> query) throws IOException
+    {
         return client.filter("Component.filter", n -> jsonToComponent(n, client), query);
     }
 
-    static Component jsonToComponent(JsonNode node, KiwiClient client) throws IOException {
-        Map<String,String> productQuery = new HashMap<>();
+    static Component jsonToComponent(JsonNode node, KiwiClient client) throws IOException
+    {
+        Map<String, String> productQuery = new HashMap<>();
         productQuery.put("id", node.get("product").asText());
         Product p = client.product()
-                          .filter(productQuery)
-                          .stream()
-                          .findFirst()
-                          .orElseThrow(() -> new IOException("No Product for given ID"));
+                .filter(productQuery)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IOException("No Product for given ID"));
         return Component.of(node.get("id").asLong(), p, node.get("name").asText());
     }
 
-    static Map<String, Object> componentElementsToMap(Component component, KiwiClient client) throws IOException {
-        Map<String,Object> map = new HashMap<>();
+    static Map<String, Object> componentElementsToMap(Component component, KiwiClient client) throws IOException
+    {
+        Map<String, Object> map = new HashMap<>();
         map.put("name", component.name);
-        if (component.product.id > 0) {
+        if (component.product.id > 0)
+        {
             map.put("product", component.product.id);
-        } else {
-            Map<String,String> productQuery = new HashMap<>();
-            productQuery.put("name",component.product.name);
+        }
+        else
+        {
+            Map<String, String> productQuery = new HashMap<>();
+            productQuery.put("name", component.product.name);
             Product p = client.product()
-                              .filter(productQuery)
-                              .stream()
-                              .findFirst()
-                              .orElseThrow(() -> new IOException("Can't find product with given name."));
-            map.put("product",p.id);
+                    .filter(productQuery)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new IOException("Can't find product with given name."));
+            map.put("product", p.id);
         }
         return map;
     }

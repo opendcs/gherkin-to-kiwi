@@ -1,27 +1,33 @@
 package org.opendcs.testing.gherkin;
 
-public class ProcessingError {
+public class ProcessingError
+{
     private final Throwable cause;
     private final String msg;
 
-    public ProcessingError(String msg) {
-        this(msg,null);
+    public ProcessingError(String msg)
+    {
+        this(msg, null);
     }
 
-    public ProcessingError(Throwable cause) {
-        this(null,cause);
+    public ProcessingError(Throwable cause)
+    {
+        this(null, cause);
     }
 
-    public ProcessingError(String msg, Throwable cause) {
+    public ProcessingError(String msg, Throwable cause)
+    {
         this.msg = msg;
         this.cause = cause;
     }
 
-    public Throwable getCause() {
+    public Throwable getCause()
+    {
         return cause;
     }
 
-    public String getMessage() {
+    public String getMessage()
+    {
         return msg;
     }
 }

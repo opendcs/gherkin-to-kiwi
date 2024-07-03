@@ -9,7 +9,7 @@ import org.opendcs.testing.kiwi.Type;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class TypeRpc 
+public class TypeRpc
 {
     private final KiwiClient client;
 
@@ -18,21 +18,20 @@ public class TypeRpc
         this.client = client;
     }
 
-
-    public List<Type> filter(Map<String,String> query) throws IOException
+    public List<Type> filter(Map<String, String> query) throws IOException
     {
         return client.filter("PlanType.filter", TypeRpc::mapType, query);
     }
 
     public Type byName(String name) throws IOException
     {
-        Map<String,String> query = new HashMap<>();
+        Map<String, String> query = new HashMap<>();
         query.put("name", name);
         return filter(query).stream()
-                            .findFirst()
-                            .orElseThrow(() -> new IOException("No type named: " + name));
-        
-    }    
+                .findFirst()
+                .orElseThrow(() -> new IOException("No type named: " + name));
+
+    }
 
     public static Type mapType(JsonNode node) throws IOException
     {

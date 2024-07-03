@@ -19,7 +19,7 @@ public class VersionRpc
         this.client = client;
     }
 
-    public List<Version> filter(Map<String,String> query) throws IOException
+    public List<Version> filter(Map<String, String> query) throws IOException
     {
         return client.filter("Version.filter", VersionRpc::mapVersion, query);
     }
@@ -27,47 +27,45 @@ public class VersionRpc
     public Version create(Version version) throws IOException
     {
         long id = client.create("Version.create",
-                                null,
-                                (node) -> mapVersion(node).id,
-                                versionElementsToMap(version, client)
-                                );
+                null,
+                (node) -> mapVersion(node).id,
+                versionElementsToMap(version, client));
         return byId(id);
     }
 
     public Version byId(long id) throws IOException
     {
-        Map<String,String> query = new HashMap<>();
-        query.put("id", ""+id);
+        Map<String, String> query = new HashMap<>();
+        query.put("id", "" + id);
         return filter(query).stream()
-                            .findFirst()
-                            .orElseThrow(() -> new IOException("Version with id '" + id + "' could not be found."));
+                .findFirst()
+                .orElseThrow(() -> new IOException("Version with id '" + id + "' could not be found."));
     }
 
-    public static Map<String,Object> versionElementsToMap(Version version, KiwiClient client) throws IOException
+    public static Map<String, Object> versionElementsToMap(Version version, KiwiClient client) throws IOException
     {
-        Map<String,Object> versionElements = new HashMap<>();
+        Map<String, Object> versionElements = new HashMap<>();
         versionElements.put("value", version.name);
-        Map<String,String> productQuery = new HashMap<>();
-        productQuery.put("name", version.product.name);        
+        Map<String, String> productQuery = new HashMap<>();
+        productQuery.put("name", version.product.name);
         long productId = client.product()
-                               .filter(productQuery)
-                               .stream()
-                               .findFirst()
-                               .orElseThrow(() -> new IOException("No Product named '" + version.product.name + "' exists in the target Kiwi Instance."))
-                               .id;
+                .filter(productQuery)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IOException(
+                        "No Product named '" + version.product.name + "' exists in the target Kiwi Instance.")).id;
         versionElements.put("product", productId);
 
         return versionElements;
-        
+
     }
 
     public static Version mapVersion(JsonNode node) throws IOException
     {
         Product product = Product.of(node.get("product__name").asText());
         return Version.of(
-                    node.get("id").asLong(),
-                    node.get("value").asText(),
-                    product
-                );
+                node.get("id").asLong(),
+                node.get("value").asText(),
+                product);
     }
 }

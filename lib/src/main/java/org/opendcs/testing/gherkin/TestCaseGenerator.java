@@ -38,59 +38,75 @@ public class TestCaseGenerator
     {
         this.product = product;
         parser = GherkinParser.builder()
-                              .includeGherkinDocument(true)
-                              .includePickles(true)
-                              .includeSource(true)
-                              .build();
+                .includeGherkinDocument(true)
+                .includePickles(true)
+                .includeSource(true)
+                .build();
     }
 
-    public Stream<FailableResult<TestCase,ProcessingError>> generateCases(Path path)
+    public Stream<FailableResult<TestCase, ProcessingError>> generateCases(Path path)
     {
         final AtomicReference<String> currentFeature = new AtomicReference<>();
-        Predicate<FailableResult<TestCase,ParseError>> excludeNull = r -> r != null;
-        try {
+        Predicate<FailableResult<TestCase, ParseError>> excludeNull = r -> r != null;
+        try
+        {
             return parser.parse(path)
-                         .map(e -> createOrSetError(e, currentFeature, product))
-                         .filter(excludeNull)
-                         .map(fr -> {
-                            if (fr.isSuccess()) {
-                                return FailableResult.success(fr.getSuccess());
-                            } else {
-                                return FailableResult.failure(new ProcessingError(fr.getFailure().getMessage()));
-                            }
-                         });
-        } catch (IOException ex) {
-            return Stream.of(FailableResult.failure(new ProcessingError("Unable to process "+ path.toUri().toString(), ex)));
+                    .map(e -> createOrSetError(e, currentFeature, product))
+                    .filter(excludeNull)
+                    .map(fr ->
+                    {
+                        if (fr.isSuccess())
+                        {
+                            return FailableResult.success(fr.getSuccess());
+                        }
+                        else
+                        {
+                            return FailableResult.failure(new ProcessingError(fr.getFailure().getMessage()));
+                        }
+                    });
+        }
+        catch (IOException ex)
+        {
+            return Stream.of(
+                    FailableResult.failure(new ProcessingError("Unable to process " + path.toUri().toString(), ex)));
         }
     }
 
-    public Stream<FailableResult<TestCase,ProcessingError>> generateCases(List<Path> paths) throws IOException {
+    public Stream<FailableResult<TestCase, ProcessingError>> generateCases(List<Path> paths) throws IOException
+    {
         return paths.stream()
-             .flatMap(p -> generateCases(p));
+                .flatMap(p -> generateCases(p));
     }
 
-    private static FailableResult<TestCase,ParseError> createOrSetError(Envelope e, AtomicReference<String> currentFeature, String product) {
-        if (e.getParseError().isPresent()) {
+    private static FailableResult<TestCase, ParseError> createOrSetError(Envelope e,
+            AtomicReference<String> currentFeature, String product)
+    {
+        if (e.getParseError().isPresent())
+        {
             return FailableResult.failure(e.getParseError().get());
         }
-        e.getGherkinDocument().ifPresent(gd -> {
-            if (log.isTraceEnabled()) {
+        e.getGherkinDocument().ifPresent(gd ->
+        {
+            if (log.isTraceEnabled())
+            {
                 log.trace(gd.getUri().orElse("no uri"));
             }
-            gd.getFeature().ifPresent(f -> {
+            gd.getFeature().ifPresent(f ->
+            {
                 currentFeature.set(f.getName());
             });
         });
 
         Optional<Pickle> pickle = e.getPickle();
-        if (pickle.isPresent()) {
-            return FailableResult.success(fromPickle(pickle.get(),currentFeature, product));
+        if (pickle.isPresent())
+        {
+            return FailableResult.success(fromPickle(pickle.get(), currentFeature, product));
         }
         return null;
     }
 
-
-    private static TestCase fromPickle(Pickle p, AtomicReference<String> currentFeature, String product) {
+    private static TestCase fromPickle(Pickle p, AtomicReference<String> currentFeature, String product)
+    {
         final TestCase.Builder testBuilder = new TestCase.Builder(product);
         testBuilder.withSummary(p.getName());
         testBuilder.withComponent(currentFeature.get());
@@ -98,14 +114,14 @@ public class TestCaseGenerator
         p.getTags().forEach(t -> testBuilder.withTag(t.getName()));
         StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);
-        for (PickleStep s: p.getSteps())
+        for (PickleStep s : p.getSteps())
         {
             s.getType().ifPresent(type ->
             {
                 String typeName = type.equals(PickleStepType.ACTION) ? "When"
-                                : type.equals(PickleStepType.OUTCOME) ? "Then"
+                        : type.equals(PickleStepType.OUTCOME) ? "Then"
                                 : type.equals(PickleStepType.CONTEXT) ? "Given"
-                                : "UNKNOWN";
+                                        : "UNKNOWN";
                 pw.println(String.format("%s: %s", typeName, s.getText()));
             });
         }
@@ -117,8 +133,7 @@ public class TestCaseGenerator
         return testBuilder.build();
     }
 
-
-    public static void main (String args[]) throws Exception
+    public static void main(String args[]) throws Exception
     {
         Path path = Paths.get("src/test/resources/feature-files/PlatformListSorting.feature");
         System.out.println(path.toFile().exists());
@@ -126,22 +141,23 @@ public class TestCaseGenerator
         final String url = args[0];
         final String user = args[1];
         final String password = args[2];
-        //KiwiClient client = new KiwiClient(url, user, password);
+        // KiwiClient client = new KiwiClient(url, user, password);
 
         List<TestCase> cases = generator.generateCases(path)
-                 .peek(ftc -> ftc.handleError(ex -> {
+                .peek(ftc -> ftc.handleError(ex ->
+                {
                     System.out.println(ex.getMessage());
-                  }))
-                 .filter(ftc -> ftc.isSuccess())
-                 .map(ftc -> ftc.getSuccess())
-                 .peek(System.out::println)
-                 .collect(Collectors.toList());
-        
+                }))
+                .filter(ftc -> ftc.isSuccess())
+                .map(ftc -> ftc.getSuccess())
+                .peek(System.out::println)
+                .collect(Collectors.toList());
+
         Path plans = Paths.get("src/test/resources/plans.kiwi");
         Map<String, PlanDefinition> planDefinitions = PlanDefinition.from(plans);
 
-        TestPlanGenerator.generateTestPlans(cases, planDefinitions,"test")
-                     .forEach(System.out::println);
-        //TestUtils.saveTestCases(cases, client);
+        TestPlanGenerator.generateTestPlans(cases, planDefinitions, "test")
+                .forEach(System.out::println);
+        // TestUtils.saveTestCases(cases, client);
     }
 }

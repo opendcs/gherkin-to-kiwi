@@ -3,6 +3,9 @@ package org.opendcs.testing.kiwi;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Hold the components of a version.
+ */
 public class Version
 {
     private static final Map<Long, Version> versions = new HashMap<>();
@@ -10,7 +13,7 @@ public class Version
     public final long id;
     public final String name;
     public final Product product;
-    
+
     private Version(String name, Product product)
     {
         this(-1, name, product);
@@ -29,15 +32,15 @@ public class Version
         {
             return new Version(id, name, product);
         });
-    }    
+    }
 
     public static Version of(String name, Product p)
     {
         return versions.values()
-                       .stream()
-                       .filter(v -> v.name.equals(name) && v.product.name.equals(p.name))
-                       .findFirst()
-                       .orElseGet(() -> new Version(name, p)); 
+                .stream()
+                .filter(v -> v.name.equals(name) && v.product.name.equals(p.name))
+                .findFirst()
+                .orElseGet(() -> new Version(name, p));
 
     }
 

@@ -30,7 +30,8 @@ import org.opendcs.testing.rpc.KiwiClient;
 import org.opendcs.testing.util.FailableResult;
 import org.opendcs.testing.util.ThrowingFunction;
 
-public class GherkinKiwiTask extends Task {
+public class GherkinKiwiTask extends Task
+{
 
     private String projectName = null;
     private String url = null;
@@ -40,70 +41,86 @@ public class GherkinKiwiTask extends Task {
     private Project proj = null;
     private String version = null;
     private Path planDefinitionsFile = null;
-    private Map<String,PlanDefinition> planDefinitions = null;
+    private Map<String, PlanDefinition> planDefinitions = null;
 
-    public GherkinKiwiTask() {
-        
+    public GherkinKiwiTask()
+    {
+
     }
-    
-    public void setProject(String projectName) {
+
+    public void setProject(String projectName)
+    {
         this.projectName = projectName;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(String url)
+    {
         this.url = url;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(String username)
+    {
         this.username = username;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(String password)
+    {
         this.password = password;
     }
 
-    public void setVersion(String version) {
+    public void setVersion(String version)
+    {
         this.version = version;
     }
 
-    public void setPlanDefinitions(String planDefinitionsFile) {
+    public void setPlanDefinitions(String planDefinitionsFile)
+    {
         this.proj.log(this, "Plan Def File = " + planDefinitionsFile, Project.MSG_INFO);
         this.planDefinitionsFile = Paths.get(planDefinitionsFile);
     }
 
-    public void addConfiguredFileSet(FileSet files) {
+    public void addConfiguredFileSet(FileSet files)
+    {
         this.files = files;
     }
 
     @Override
-    public void init() throws BuildException {
+    public void init() throws BuildException
+    {
         this.proj = getProject();
     }
 
-    public void validate_settings() throws BuildException {
-        if (this.projectName == null) {
+    public void validate_settings() throws BuildException
+    {
+        if (this.projectName == null)
+        {
             this.projectName = proj.getName();
         }
 
-        if (url == null) {
+        if (url == null)
+        {
             throw new BuildException("'url' attribute must be set", getLocation());
         }
 
-        if (username == null) {
+        if (username == null)
+        {
             throw new BuildException("'username' attribute must be set", getLocation());
         }
 
-        if (password == null) {
+        if (password == null)
+        {
             throw new BuildException("'password' attribute must be set", getLocation());
         }
 
-        if (files == null) { 
+        if (files == null)
+        {
             throw new BuildException("A nested FileSet must be provided.", getLocation());
         }
 
-        if (planDefinitionsFile == null) {
+        if (planDefinitionsFile == null)
+        {
             throw new BuildException("A 'planDefinitions' attribute must be set to a file"
-                                    +" containing a json list of test plan defitions.", getLocation());
+                    + " containing a json list of test plan defitions.", getLocation());
         }
 
         try
@@ -117,30 +134,35 @@ public class GherkinKiwiTask extends Task {
     }
 
     @Override
-    public void execute() throws BuildException {
+    public void execute() throws BuildException
+    {
         validate_settings();
         try
         {
             final KiwiClient client = new KiwiClient(url, username, password);
             System.out.println("Creating test cases for '" + projectName + "' at url '" + url + "'");
-            Consumer<ProcessingError> onError = 
-                err -> {
-                    if (err.getMessage() != null && err.getCause() != null) {
-                        throw new BuildException(err.getMessage(), err.getCause());
-                    } else if (err.getCause() != null) {
-                        throw new BuildException("Unable to process feature file", err.getCause());
-                    } else {
-                        throw new BuildException(err.getMessage());
-                    }
-                };
+            Consumer<ProcessingError> onError = err ->
+            {
+                if (err.getMessage() != null && err.getCause() != null)
+                {
+                    throw new BuildException(err.getMessage(), err.getCause());
+                }
+                else if (err.getCause() != null)
+                {
+                    throw new BuildException("Unable to process feature file", err.getCause());
+                }
+                else
+                {
+                    throw new BuildException(err.getMessage());
+                }
+            };
             TestUtils.processAndSaveData(client,
-                                        projectName,
-                                        version,
-                                        files.stream().map(r -> new File(r.getName()).toPath()),
-                                        planDefinitions,
-                                        obj -> proj.log(GherkinKiwiTask.this, obj.toString(), Project.MSG_INFO),
-                                        onError
-                                        );
+                    projectName,
+                    version,
+                    files.stream().map(r -> new File(r.getName()).toPath()),
+                    planDefinitions,
+                    obj -> proj.log(GherkinKiwiTask.this, obj.toString(), Project.MSG_INFO),
+                    onError);
         }
         catch (IOException ex)
         {

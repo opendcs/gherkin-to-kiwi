@@ -5,16 +5,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TestPlan {
+/**
+ * A group of tests that should be run as a group.
+ */
+public class TestPlan
+{
     private final String name;
     private final long id;
     private final Product product;
     private final Version version;
     private final Type type;
     private final List<TestCase> cases;
-    
 
-    private TestPlan(long id, String name, Product product, Version version, Type type, List<TestCase> cases) {
+    private TestPlan(long id, String name, Product product, Version version, Type type, List<TestCase> cases)
+    {
         this.id = id;
         this.name = name;
         this.product = product;
@@ -23,31 +27,38 @@ public class TestPlan {
         this.cases = cases;
     }
 
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public long getId() {
+    public long getId()
+    {
         return id;
     }
 
-    public Product getProduct() {
+    public Product getProduct()
+    {
         return product;
     }
 
-    public Version getVersion() {
+    public Version getVersion()
+    {
         return version;
     }
 
-    public Type getType() {
+    public Type getType()
+    {
         return type;
     }
 
-    public List<TestCase> getCases() {
+    public List<TestCase> getCases()
+    {
         return Collections.unmodifiableList(cases);
     }
 
-    public TestPlan.Builder newBuilder() {
+    public TestPlan.Builder newBuilder()
+    {
         return new Builder(this);
     }
 
@@ -61,15 +72,15 @@ public class TestPlan {
         sb.append("Product=").append(getProduct().name).append(",");
         sb.append("Type=").append(getType().toString()).append(",");
         sb.append("Cases=")
-          .append(
-            cases.stream()
-                 .map(tc -> tc.getSummary())
-                 .collect(Collectors.joining(","))
-        );
+                .append(
+                        cases.stream()
+                                .map(tc -> tc.getSummary())
+                                .collect(Collectors.joining(",")));
         return sb.append("}").toString();
     }
 
-    public static class Builder {
+    public static class Builder
+    {
         private long id = -1;
         private String name = null;
         private Product product = null;
@@ -77,11 +88,13 @@ public class TestPlan {
         private List<TestCase> cases = new ArrayList<>();
         private Version version = null;
 
-        public Builder() {
+        public Builder()
+        {
 
         }
 
-        public Builder(TestPlan tp) {
+        public Builder(TestPlan tp)
+        {
             this.id = tp.id;
             this.name = tp.name;
             this.product = tp.product;
@@ -90,47 +103,56 @@ public class TestPlan {
             this.cases.addAll(tp.getCases());
         }
 
-        public Builder withId(long id) {
+        public Builder withId(long id)
+        {
             this.id = id;
             return this;
         }
 
-        public Builder withName(String name) {
+        public Builder withName(String name)
+        {
             this.name = name;
             return this;
         }
 
-        public Builder withProduct(Product product) {
+        public Builder withProduct(Product product)
+        {
             this.product = product;
             return this;
         }
 
-        public Builder withVersion(Version version) {
+        public Builder withVersion(Version version)
+        {
             this.version = version;
             return this;
         }
 
-        public Builder withVersion(String name) {
+        public Builder withVersion(String name)
+        {
             this.version = Version.of(name, this.product);
             return this;
         }
 
-        public Builder withType(String type) {
+        public Builder withType(String type)
+        {
             this.type = Type.of(type);
             return this;
         }
 
-        public Builder withType(Type type) {
+        public Builder withType(Type type)
+        {
             this.type = type;
             return this;
         }
 
-        public Builder withTest(TestCase tc) {
+        public Builder withTest(TestCase tc)
+        {
             cases.add(tc);
             return this;
         }
 
-        public TestPlan build() {
+        public TestPlan build()
+        {
             return new TestPlan(id, name, product, Version.of(version.name, product), type, cases);
         }
     }

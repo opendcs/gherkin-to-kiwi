@@ -3,9 +3,12 @@ package org.opendcs.testing.kiwi;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Contains Plan Types for reference in TestPlans
+ */
 public class Type
 {
-    private static Map<Long,Type> typeMap = new HashMap<>();
+    private static Map<Long, Type> typeMap = new HashMap<>();
 
     public final long id;
     public final String name;
@@ -27,21 +30,20 @@ public class Type
         return String.format("Type{id=%d,name=%s}", id, name);
     }
 
-
     public static Type of(long id, String name)
     {
         return typeMap.computeIfAbsent(id, key ->
         {
-            return new Type(id,name);
+            return new Type(id, name);
         });
     }
 
     public static Type of(final String name)
     {
         return typeMap.values()
-                      .stream()
-                      .filter(p -> p.name.equals(name))
-                      .findFirst()
-                      .orElseGet(() -> new Type(name));
+                .stream()
+                .filter(p -> p.name.equals(name))
+                .findFirst()
+                .orElseGet(() -> new Type(name));
     }
 }

@@ -3,17 +3,15 @@ package org.opendcs.testing.ant;
 import java.io.File;
 import java.net.URL;
 
-import org.apache.tools.ant.BuildEvent;
-import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
-import org.apache.tools.ant.Task;
 import org.junit.jupiter.api.Test;
 
-
-public class GherkinKiwiTaskTest {
+public class GherkinKiwiTaskTest
+{
     @Test
-    public void test_kiwi_build() throws Exception {
+    public void test_kiwi_build() throws Exception
+    {
         Project proj = new Project();
         URL url = this.getClass().getClassLoader().getResource("ant-builds/simple-build.xml");
         File buildFile = new File(url.toURI());

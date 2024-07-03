@@ -12,8 +12,17 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Provided Definition of a test plan that TestCases can be associated to.
+ * A test plan definition file can contain any many test plans as required
+ * for the given system.
+ */
 public final class PlanDefinition
 {
+    /**
+     * Arbitrary ID Field with no spaces that is used to reference the plan with
+     * @see org.opendcs.testing.kiwi.tags.PlanTag
+     */
     public final String id;
     public final String name;
     public final String type;
@@ -22,9 +31,10 @@ public final class PlanDefinition
     {
         jsonMapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
     }
-    
+
     @JsonCreator
-    public PlanDefinition(@JsonProperty("id") String id, @JsonProperty("name") String name, @JsonProperty("type") String type)
+    public PlanDefinition(@JsonProperty("id") String id, @JsonProperty("name") String name,
+            @JsonProperty("type") String type)
     {
         this.id = id;
         this.name = name;
@@ -33,17 +43,23 @@ public final class PlanDefinition
 
     /**
      * Read available plan definitions from the given file.
-     * @param jsonData
-     * @return map of id -> plan def;
+     *
+     * @param jsonData Reference to the file containing the test plan definitions.
+     * @return map of id -&gt; plan def.
+     * @throws IOException Any error reading from the provided Path.
      */
-    public static Map<String,PlanDefinition> from(Path jsonData) throws IOException {
-        final Map<String,PlanDefinition> plans = new HashMap<>();
-        List<PlanDefinition> definitions = jsonMapper.readValue(jsonData.toUri().toURL(), new TypeReference<List<PlanDefinition>>(){});
+    public static Map<String, PlanDefinition> from(Path jsonData) throws IOException
+    {
+        final Map<String, PlanDefinition> plans = new HashMap<>();
+        List<PlanDefinition> definitions = jsonMapper.readValue(jsonData.toUri().toURL(),
+                new TypeReference<List<PlanDefinition>>()
+                {
+                });
         definitions.forEach(planDefinition ->
         {
             plans.put(planDefinition.id, planDefinition);
         });
         return plans;
     }
-    
+
 }

@@ -12,27 +12,38 @@ import org.opendcs.testing.kiwi.TestPlan;
 import org.opendcs.testing.kiwi.tags.KiwiTag;
 import org.opendcs.testing.kiwi.tags.PlanTag;
 
-public class TestPlanGenerator {
-    
-    public static Stream<TestPlan> generateTestPlans(List<TestCase> cases, Map<String,PlanDefinition> planDefinitions, String version) {
+public class TestPlanGenerator
+{
+
+    public static Stream<TestPlan> generateTestPlans(List<TestCase> cases, Map<String, PlanDefinition> planDefinitions,
+            String version)
+    {
         return generateTestPlans(cases.stream(), planDefinitions, version);
     }
 
     /**
      * Generates test plans from the given cases. Uses Tags that were put on each test in the feature file
-     * @param cases
+     *
+     * @param cases Cases to associate to plans.
+     * @param planDefinitions plan definitions for lookup from the Kiwi.Plan tags.
+     * @param version version to apply to the test plans.
      * @return TestPlan objects ready to be saved to kiwi
      */
-    public static Stream<TestPlan> generateTestPlans(Stream<TestCase> cases, Map<String,PlanDefinition> planDefinitions, String version) {
-        final Map<String,TestPlan.Builder> plans = new HashMap<>();
-        
+    public static Stream<TestPlan> generateTestPlans(Stream<TestCase> cases,
+            Map<String, PlanDefinition> planDefinitions, String version)
+    {
+        final Map<String, TestPlan.Builder> plans = new HashMap<>();
+        // TODO: make this a stream also, then we have all of these operations linked as streams.
         cases.forEach(tc ->
         {
-            Stream<PlanTag> kiwiTags = processTags(tc.getTags()).filter(t -> t instanceof PlanTag).map(t -> (PlanTag)t);
-            kiwiTags.forEach(pt -> {
-                TestPlan.Builder builder = plans.computeIfAbsent(pt.planName, key -> {
+            Stream<PlanTag> kiwiTags = processTags(tc.getTags()).filter(t -> t instanceof PlanTag)
+                    .map(t -> (PlanTag) t);
+            kiwiTags.forEach(pt ->
+            {
+                TestPlan.Builder builder = plans.computeIfAbsent(pt.planName, key ->
+                {
                     return new TestPlan.Builder()
-                                       .withProduct(tc.getProduct());
+                            .withProduct(tc.getProduct());
                 });
                 builder.withTest(tc);
                 PlanDefinition pd = planDefinitions.get(pt.planName);
@@ -44,10 +55,10 @@ public class TestPlanGenerator {
         return plans.values().stream().map(TestPlan.Builder::build);
     }
 
-
-    public static Stream<KiwiTag> processTags(List<String> tags) {
+    public static Stream<KiwiTag> processTags(List<String> tags)
+    {
         return tags.stream()
-                   .map(t -> KiwiTag.of(t))
-                   .filter(kt -> kt != null);
+                .map(t -> KiwiTag.of(t))
+                .filter(kt -> kt != null);
     }
 }
