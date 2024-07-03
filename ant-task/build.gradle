@@ -2,6 +2,7 @@ plugins
 {
     id 'opendcs-kiwi.deps-conventions'
     id 'opendcs-kiwi.java-conventions'
+    id 'opendcs-kiwi.publishing-conventions'
 }
 
 dependencies {
@@ -13,4 +14,23 @@ dependencies {
 
 test {
     systemProperties += project.properties.findAll { k,v -> k.startsWith("kiwi") }
+}
+
+signing {
+    sign publishing.publications.maven
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'opendcs-tcms-ant-task'
+            from components.java
+
+            pom {
+                name = 'OpenDCS TCMS Ant Task'
+                description = 'Ant Task to Support TCMS operations'
+            }
+        }
+    }
 }

@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'signing'
+    id 'maven-publish'
+}
+
+signing {
+    useGpgCmd()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                url = 'https://github.com/opendcs/gherkin-to-kiwi'
+
+                scm {
+                    connection = 'scm:git:https://github.com/opendcs/gherkin-to-kiwi.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:opendcs/gherkin-to-kiwi.git'
+                    url = 'https://github.com/opendcs/gherkin-to-kiwi'
+                }
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'opendcs'
+                        name = 'The OpenDCS Team'
+                        email = 'https://github.com/opendcs'
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            def releaseUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            name = 'MavenCentral'
+            url = version.endsWith('SNAPSHOT') ? snapshotUrl : releaseUrl
+        }
+    }
+}
