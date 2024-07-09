@@ -76,12 +76,12 @@ public class TestUtils
                 {
                     client.testcase().add_component(idOut, c, true);
                 }
-                log.info("Created test, new id =" + idOut);
+                log.debug("Created test, new id =" + idOut);
                 id = idOut;
             }
             else
             {
-                log.info("Updating test case. id = " + id);
+                log.debug("Updating test case. id = " + id);
                 client.testcase().update(id, tc);
             }
             return FailableResult.success(tc.newBuilder().withId(id).build());
