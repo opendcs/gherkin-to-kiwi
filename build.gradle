@@ -5,6 +5,6 @@ plugins
 }
 
 allprojects {
-    group = 'org.opendcs'
-    version = '1.0.0-M1'
+    group = 'org.opendcs.testing'
+    version = '1.0.0-M8'
 }

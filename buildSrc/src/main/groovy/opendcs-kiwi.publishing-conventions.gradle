@@ -42,8 +42,15 @@ publishing {
         maven {
             def releaseUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             def snapshotUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            def user = project.findProperty("ossrhUsername")
+            def passwd = project.findProperty("ossrhPassword")
             name = 'MavenCentral'
             url = version.endsWith('SNAPSHOT') ? snapshotUrl : releaseUrl
+            credentials {
+                username = user
+                password = passwd
+            }
         }
+        mavenLocal()
     }
 }

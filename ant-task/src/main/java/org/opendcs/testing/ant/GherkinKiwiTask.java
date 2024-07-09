@@ -4,36 +4,26 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
-import org.apache.tools.ant.types.Resource;
 import org.opendcs.testing.PlanDefinition;
 import org.opendcs.testing.gherkin.ProcessingError;
-import org.opendcs.testing.gherkin.TestCaseGenerator;
-import org.opendcs.testing.gherkin.TestPlanGenerator;
-import org.opendcs.testing.kiwi.Product;
-import org.opendcs.testing.kiwi.TestCase;
-import org.opendcs.testing.kiwi.TestPlan;
 import org.opendcs.testing.kiwi.TestUtils;
-import org.opendcs.testing.kiwi.Version;
 import org.opendcs.testing.rpc.KiwiClient;
-import org.opendcs.testing.util.FailableResult;
-import org.opendcs.testing.util.ThrowingFunction;
+
 
 public class GherkinKiwiTask extends Task
 {
 
-    private String projectName = null;
+    /**
+     * Defaults to Project name if attribute not set by the user.
+     */
+    private String productName = null;
     private String url = null;
     private String username = null;
     private String password = null;
@@ -48,9 +38,9 @@ public class GherkinKiwiTask extends Task
 
     }
 
-    public void setProject(String projectName)
+    public void setProductName(String productName)
     {
-        this.projectName = projectName;
+        this.productName = productName;
     }
 
     public void setUrl(String url)
@@ -92,9 +82,9 @@ public class GherkinKiwiTask extends Task
 
     public void validate_settings() throws BuildException
     {
-        if (this.projectName == null)
+        if (this.productName == null)
         {
-            this.projectName = proj.getName();
+            this.productName = proj.getName();
         }
 
         if (url == null)
@@ -140,7 +130,7 @@ public class GherkinKiwiTask extends Task
         try
         {
             final KiwiClient client = new KiwiClient(url, username, password);
-            System.out.println("Creating test cases for '" + projectName + "' at url '" + url + "'");
+            proj.log(this, "Creating test cases for '" + productName + "' at url '" + url + "'", Project.MSG_INFO);
             Consumer<ProcessingError> onError = err ->
             {
                 if (err.getMessage() != null && err.getCause() != null)
@@ -156,17 +146,18 @@ public class GherkinKiwiTask extends Task
                     throw new BuildException(err.getMessage());
                 }
             };
+            proj.log(this, "Processing and Saving Test Sets.", Project.MSG_VERBOSE);
             TestUtils.processAndSaveData(client,
-                    projectName,
+                    productName,
                     version,
                     files.stream().map(r -> new File(r.getName()).toPath()),
                     planDefinitions,
-                    obj -> proj.log(GherkinKiwiTask.this, obj.toString(), Project.MSG_INFO),
+                    obj -> proj.log(GherkinKiwiTask.this, obj.toString(), Project.MSG_VERBOSE),
                     onError);
         }
         catch (IOException ex)
         {
-            throw new BuildException("Unable to connect to Kiwi Client.", ex, getLocation());
+            throw new BuildException("Unable to connect to Kiwi Client: " + ex.getLocalizedMessage(), ex, getLocation());
         }
     }
 }

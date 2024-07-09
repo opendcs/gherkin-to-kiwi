@@ -56,7 +56,6 @@ public class TestPlanRpc
                 n -> fillTestPlan(n, client),
                 id,
                 testPlanElementsToMap(plan, client));
-        // TODO: remove/refill test cases
         return tpOut;
     }
 
@@ -133,5 +132,17 @@ public class TestPlanRpc
                 .withVersion(client.version().byId(node.get("product_version").asLong()));
         ;
         return tpb.build();
+    }
+
+    public void delete_test_cases(long planId) throws IOException
+    {
+        Map<String,String> query = new HashMap<>();
+        query.put("plan__id", Long.toString(planId));
+        List<TestCase> cases = client.testcase().filter(query);
+        for(TestCase n: cases)
+        {
+            long caseId = n.getId();
+            this.remove_test_case(planId, caseId);
+        };
     }
 }

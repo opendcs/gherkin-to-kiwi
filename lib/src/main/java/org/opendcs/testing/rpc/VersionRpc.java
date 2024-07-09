@@ -7,11 +7,14 @@ import java.util.Map;
 
 import org.opendcs.testing.kiwi.Product;
 import org.opendcs.testing.kiwi.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class VersionRpc
 {
+    private static final Logger log = LoggerFactory.getLogger(VersionRpc.class);
     private final KiwiClient client;
 
     public VersionRpc(KiwiClient client)
@@ -62,6 +65,7 @@ public class VersionRpc
 
     public static Version mapVersion(JsonNode node) throws IOException
     {
+        log.info("Version: {}", node.toPrettyString());
         Product product = Product.of(node.get("product__name").asText());
         return Version.of(
                 node.get("id").asLong(),

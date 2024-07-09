@@ -7,12 +7,13 @@ ant test
 This will verify that everything can compile and tests can run
 NOTE at this time jdk8 must be used as there is still a dependency on tools.jar
 -->
-<project name="OpenDCS" default="kiwi" basedir=".">
+<project name="OpenDCS Toolkit" default="kiwi" basedir=".">
     <taskdef resource="org/opendcs/tcms/antcontrib/antcontrib.properties"/>
     <description>Open DCS</description>
     <target name="kiwi">
         <gherkin-kiwi url="${kiwi.url}" username="${kiwi.username}" password="${kiwi.password}"
                       version="test" planDefinitions="src/test/resources/testplans.kiwi"
+                      productName="OpenDCS"
         >
             <fileset dir="." includes="src/test/**/*.feature"/>
         </gherkin-kiwi>

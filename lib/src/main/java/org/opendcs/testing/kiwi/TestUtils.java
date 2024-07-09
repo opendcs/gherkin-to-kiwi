@@ -129,8 +129,7 @@ public class TestUtils
             else
             {
                 rpc.update(id, plan);
-                // TODO: removing existing cases
-
+                rpc.delete_test_cases(id);
             }
             for (TestCase tc : plan.getCases())
             {
@@ -186,15 +185,16 @@ public class TestUtils
         Stream<TestCase> cases = files
                 .flatMap(mapCases)
                 .peek(logger);
-
+        logger.accept("Setting up Case Stream.");
         Stream<TestCase> casesWithId = TestUtils.saveTestCases(cases, client)
                 .peek(fr -> fr.handleError(onError))
                 .filter(fr -> fr.isSuccess())
                 .map(r -> r.getSuccess())
                 .peek(logger);
 
+        logger.accept("Setting up Plan Stream.");
         Stream<TestPlan> plans = TestPlanGenerator.generateTestPlans(casesWithId, planDefinitions, version);
-
+        logger.accept("Saving Plans.");
         TestUtils.saveTestPlans(plans, client)
                 .peek(fr -> fr.handleError(onError))
                 .filter(fr -> fr.isSuccess())
