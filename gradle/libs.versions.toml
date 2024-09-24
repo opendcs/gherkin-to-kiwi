@@ -7,6 +7,7 @@ ant = "1.10.12"
 junit = "5.10.2"
 slf4j = "2.0.12"
 test-containers = "1.19.7"
+commons-io = "2.11.0"
 
 [libraries]
 gherkin = { module = "io.cucumber:gherkin", version.ref="gherkin" }
@@ -16,6 +17,7 @@ fasterxml-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", v
 fasterxml-jackson-databind = { module ="com.fasterxml.jackson.core:jackson-databind", version.ref = "fasterxml" }
 ant = { module = "org.apache.ant:ant", version.ref = "ant" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+apache-commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }

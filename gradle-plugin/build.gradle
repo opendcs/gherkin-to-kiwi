@@ -1,6 +1,7 @@
 
 
 plugins {
+    id 'groovy'
     id 'java-gradle-plugin'
     id 'opendcs-kiwi.java-conventions'
     id 'opendcs-kiwi.deps-conventions'
@@ -13,6 +14,8 @@ dependencies {
     compileOnly gradleApi()
     testRuntimeOnly('org.slf4j:slf4j-simple:2.0.13')
     testImplementation(libs.bundles.junit)
+    testImplementation(libs.apache.commons.io)
+    testImplementation gradleTestKit()
 }
 
 test {
