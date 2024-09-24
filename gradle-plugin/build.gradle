@@ -1,0 +1,29 @@
+
+
+plugins {
+    id 'java-gradle-plugin'
+    id 'opendcs-kiwi.java-conventions'
+    id 'opendcs-kiwi.deps-conventions'
+}
+
+dependencies {
+    compileOnly gradleApi()
+    api project(":lib")
+
+    compileOnly gradleApi()
+    testRuntimeOnly('org.slf4j:slf4j-simple:2.0.13')
+    testImplementation(libs.bundles.junit)
+}
+
+test {
+    systemProperties += project.properties.findAll { k,v -> k.startsWith("kiwi") }
+}
+
+gradlePlugin {
+    plugins {
+        simplePlugin {
+            id = 'org.opendcs.testing.tcms.gherkin-kiwi'
+            implementationClass = 'org.opendcs.testing.gradle.GherkinKiwiPlugin'
+        }
+    }
+}
