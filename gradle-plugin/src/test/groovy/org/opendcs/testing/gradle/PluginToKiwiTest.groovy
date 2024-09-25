@@ -26,7 +26,7 @@ import org.gradle.api.Task;
 
 class PluginToKiwiTest 
 {
-    @TempDir(cleanup = CleanupMode.NEVER)
+    @TempDir(cleanup = CleanupMode.ON_SUCCESS)
     File testProjectDir;
     private File settingsFile;
     private File buildFile;
@@ -46,4 +46,53 @@ class PluginToKiwiTest
         
     }
 
+    @Test
+    void test_push() throws Exception
+    {
+        settingsFile << """
+            rootProject.name = 'kiwi-push-test'
+        """
+        buildFile << """
+            version = "0.1"
+            kiwi {
+                product = "test"
+                
+
+                outputs {
+                    hec {
+                        product = "OpenDCS"
+                        type = "kiwi"
+                        url = project.getProperty("kiwi.url")
+                        version = project.version
+                        username = project.getProperty("kiwi.user")
+                        password = project.getProperty("kiwi.password")
+
+                        plans {
+                            Plan1 {
+                                name = "A Simple Plan"
+                                type = "Acceptance"
+                            }
+
+                            Plan2 {
+                                name = "A plan with space in the ID"
+                                type = "Acceptance"
+                            }
+                        }
+                    }
+                }
+            }
+        """
+
+        def result = GradleRunner.create()
+                                 .withProjectDir(testProjectDir)
+                                 .withArguments("outputTestCases",
+                                                "-Pkiwi.user=" + System.getProperty("kiwi.user"),
+                                                "-Pkiwi.password=" + System.getProperty("kiwi.password"),
+                                                "-Pkiwi.url=" + System.getProperty("kiwi.url"),
+                                                "--stacktrace")
+                                 .withPluginClasspath()
+                                 .build()
+
+        
+    }
 }

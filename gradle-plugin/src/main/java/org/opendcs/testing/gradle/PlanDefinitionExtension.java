@@ -12,7 +12,10 @@ public abstract class PlanDefinitionExtension
         this.id = id;
     }
 
-    public abstract Property<String> getId();
+    public String getId()
+    {
+        return id;
+    }
     public abstract Property<String> getName();
     public abstract Property<String> getType();    
 }

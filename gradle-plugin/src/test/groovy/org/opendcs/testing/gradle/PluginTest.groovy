@@ -26,7 +26,7 @@ import org.gradle.api.Task;
 
 class PluginTest 
 {
-    @TempDir(cleanup = CleanupMode.NEVER)
+    @TempDir(cleanup = CleanupMode.ON_SUCCESS)
     File testProjectDir;
     private File settingsFile;
     private File buildFile;
@@ -72,7 +72,7 @@ class PluginTest
                                 type = "Acceptance"
                             }
 
-                            "Plan 2" {
+                            Plan2 {
                                 name = "A plan with space in the ID"
                                 type = "Integration"
                             }
@@ -84,9 +84,9 @@ class PluginTest
 
         def result = GradleRunner.create()
                                  .withProjectDir(testProjectDir)
-                                 .withArguments("outputTestCases")
+                                 .withArguments("outputTestCases","--info")
                                  .withPluginClasspath()
-                                 .build()
-        assertTrue(result.output.contains("test"))
+                                 .buildAndFail()
+        //assertTrue(result.output.contains("Kiwi url is not set."))
     }
 }

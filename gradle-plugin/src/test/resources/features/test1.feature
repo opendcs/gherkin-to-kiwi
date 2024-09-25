@@ -1,4 +1,5 @@
 @Kiwi.Plan(Plan1)
+@Kiwi.Plan(Plan2)
 Feature: Test 1
 
     Background: Basic Setup
