@@ -1,5 +1,7 @@
 package org.opendcs.testing.gradle;
 
+import org.gradle.api.NamedDomainObjectContainer;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 
 public abstract class OutputConfig
@@ -22,5 +24,6 @@ public abstract class OutputConfig
     public abstract Property<String> getUsername();
     public abstract Property<String> getPassword();
     public abstract Property<String> getVersion();
-    public abstract Property<String> getProduct();   
+    public abstract Property<String> getProduct();
+    public abstract NamedDomainObjectContainer<PlanDefinitionExtension> getPlans();
 }

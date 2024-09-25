@@ -1,0 +1,49 @@
+package org.opendcs.testing.gradle;
+
+import org.apache.commons.io.FileUtils;
+
+import org.gradle.testfixtures.ProjectBuilder;
+import org.gradle.testkit.runner.BuildResult;
+import org.gradle.testkit.runner.GradleRunner;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.io.CleanupMode;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Paths
+
+import org.gradle.api.Action;
+import org.gradle.api.Project;
+import org.gradle.api.Task;
+
+class PluginToKiwiTest 
+{
+    @TempDir(cleanup = CleanupMode.NEVER)
+    File testProjectDir;
+    private File settingsFile;
+    private File buildFile;
+    
+    @BeforeEach
+    void setup() throws Exception
+    {
+        settingsFile = new File(testProjectDir, "settings.gradle");
+        buildFile = new File(testProjectDir, "build.gradle");
+        buildFile << """
+            plugins {
+                id 'org.opendcs.testing.tcms.gherkin-kiwi'
+            }
+        """
+        def resources = new File("src/test/resources")
+        FileUtils.copyDirectory(resources, new File(testProjectDir, "src/test/resources"))
+        
+    }
+
+}

@@ -62,4 +62,30 @@ public final class PlanDefinition
         return plans;
     }
 
+    public static class PlanDefinitionBuilder
+    {
+        final Map<String, PlanDefinition> plans;
+
+        private PlanDefinitionBuilder()
+        {
+            plans = new HashMap<>();
+        }
+
+        public Map<String, PlanDefinition> build()
+        {
+            return plans;
+        }
+
+        public PlanDefinitionBuilder withPlan(PlanDefinition plan)
+        {
+            plans.put(plan.id, plan);
+            return this;
+        }
+
+        public PlanDefinitionBuilder withPlan(String id, String name, String type)
+        {
+            plans.put(id, new PlanDefinition(id, name, type));
+            return this;
+        }
+    }
 }

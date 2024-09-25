@@ -1,11 +1,15 @@
 package org.opendcs.testing.gradle;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.ListProperty;
+import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.TaskAction;
+import org.opendcs.testing.PlanDefinition;
 
 public abstract class KiwiOutputTask extends DefaultTask
 {  
@@ -25,6 +29,9 @@ public abstract class KiwiOutputTask extends DefaultTask
     @Input
     Property<String> version;
 
+    @Input
+    NamedDomainObjectContainer<PlanDefinitionExtension> plans;
+
     @TaskAction
     public void storeData()
     {
@@ -34,6 +41,11 @@ public abstract class KiwiOutputTask extends DefaultTask
             .filter(f -> f.getName().endsWith(".feature"))
             .map(f -> f.getAbsolutePath())
             .forEach(System.out::println);
+        
+        if (plans.getAsMap().isEmpty())
+        {
+            throw new RuntimeException("No plans have been defined.");
+        }
     }
 
     public DirectoryProperty getFeatureFiles()
@@ -71,4 +83,8 @@ public abstract class KiwiOutputTask extends DefaultTask
         return version;
     }
 
+    public NamedDomainObjectContainer<PlanDefinitionExtension> getPlans()
+    {
+        return plans;
+    }
 }

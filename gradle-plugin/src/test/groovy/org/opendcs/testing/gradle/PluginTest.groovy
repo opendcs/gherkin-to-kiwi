@@ -56,6 +56,8 @@ class PluginTest
             version = "0.1"
             kiwi {
                 product = "test"
+                
+
                 outputs {
                     hec {
                         type = "kiwi"
@@ -63,6 +65,18 @@ class PluginTest
                         version = project.version
                         username = "test_user"
                         password = "test_password"
+
+                        plans {
+                            Plan1 {
+                                name = "A Simple Plan"
+                                type = "Acceptance"
+                            }
+
+                            "Plan 2" {
+                                name = "A plan with space in the ID"
+                                type = "Integration"
+                            }
+                        }
                     }
                 }
             }
