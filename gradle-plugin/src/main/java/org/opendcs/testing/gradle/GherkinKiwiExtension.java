@@ -1,5 +1,6 @@
 package org.opendcs.testing.gradle;
 
+import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
@@ -11,4 +12,6 @@ public interface GherkinKiwiExtension
     Property<String> getProduct();
     @InputDirectory
     DirectoryProperty getFeatureFiles();
+    @Input
+    NamedDomainObjectContainer<OutputConfig>  getOutputs();
 }

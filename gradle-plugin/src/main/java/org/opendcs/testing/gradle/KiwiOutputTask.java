@@ -14,6 +14,16 @@ public abstract class KiwiOutputTask extends DefaultTask
 
     @Input
     Property<String> product;
+    @Input
+    Property<String> type;
+    @Input
+    Property<String> url;
+    @Input
+    Property<String> username;
+    @Input
+    Property<String> password;
+    @Input
+    Property<String> version;
 
     @TaskAction
     public void storeData()
@@ -35,4 +45,30 @@ public abstract class KiwiOutputTask extends DefaultTask
     {
         return product;
     }
+
+    public Property<String> getType()
+    {
+        return type;
+    }
+
+    public Property<String> getUrl()
+    {
+        return url;
+    }
+
+    public Property<String> getUsername()
+    {
+        return username;
+    }
+
+    public Property<String> getPassword()
+    {
+        return password;
+    }
+
+    public Property<String> getVersion()
+    {
+        return version;
+    }
+
 }

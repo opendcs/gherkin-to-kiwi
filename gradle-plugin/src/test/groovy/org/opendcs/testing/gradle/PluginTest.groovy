@@ -53,14 +53,24 @@ class PluginTest
             rootProject.name = 'plugin-test'
         """
         buildFile << """
+            version = "0.1"
             kiwi {
                 product = "test"
+                outputs {
+                    hec {
+                        type = "kiwi"
+                        url = "https://test.local"
+                        version = project.version
+                        username = "test_user"
+                        password = "test_password"
+                    }
+                }
             }
         """
 
         def result = GradleRunner.create()
                                  .withProjectDir(testProjectDir)
-                                 .withArguments("kiwiPush")
+                                 .withArguments("outputTestCases")
                                  .withPluginClasspath()
                                  .build()
         assertTrue(result.output.contains("test"))
