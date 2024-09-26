@@ -45,7 +45,10 @@ public abstract class KiwiOutputTask extends DefaultTask
     Property<String> version;
 
     @Input
-    NamedDomainObjectContainer<PlanDefinitionExtension> plans;
+    ListProperty<String> selectedPlans;
+
+    @Input
+    ListProperty<PlanDefinition> plans;
 
     @TaskAction
     public void storeData()
@@ -71,7 +74,7 @@ public abstract class KiwiOutputTask extends DefaultTask
             .getFiles().stream()
             .map(File::toPath);
         
-        if (plans.getAsMap().isEmpty())
+        if (plans.get().isEmpty())
         {
             throw new RuntimeException("No plans have been defined.");
         }
@@ -79,11 +82,10 @@ public abstract class KiwiOutputTask extends DefaultTask
         try
         {
             final Map<String,PlanDefinition> planDefs = new HashMap<>();
-            System.out.println("Plan size" + plans.getAsMap().size());
-            plans.all(pde -> 
+            System.out.println("Plan size" + plans.get().size());
+            plans.get().forEach(pd ->
             {
-                System.out.println("Creating/Updating plan " + pde.getId());
-                PlanDefinition pd = new PlanDefinition(pde.getId(), pde.getName().get(), pde.getType().get());
+                System.out.println("Creating/Updating plan " + pd.id);
                 planDefs.put(pd.id, pd);
             });
             if (!url.isPresent())
@@ -141,7 +143,12 @@ public abstract class KiwiOutputTask extends DefaultTask
         return version;
     }
 
-    public NamedDomainObjectContainer<PlanDefinitionExtension> getPlans()
+    public ListProperty<String> getSelectedPlans()
+    {
+        return selectedPlans;
+    }
+
+    public ListProperty<PlanDefinition> getPlans()
     {
         return plans;
     }

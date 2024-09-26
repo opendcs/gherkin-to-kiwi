@@ -57,6 +57,22 @@ class PluginTest
             kiwi {
                 product = "test"
                 
+                plans {
+                    Plan1 {
+                        planName = "A Simple Plan"
+                        type = "Acceptance"
+                    }
+
+                    Plan2 {
+                        planName = "A plan with space in the ID"
+                        type = "Integration"
+                    }
+
+                    Plan3 {
+                        planName = "A third plan"
+                        type = "Acceptance"
+                    }
+                }
 
                 outputs {
                     hec {
@@ -65,18 +81,6 @@ class PluginTest
                         version = project.version
                         username = "test_user"
                         password = "test_password"
-
-                        plans {
-                            Plan1 {
-                                name = "A Simple Plan"
-                                type = "Acceptance"
-                            }
-
-                            Plan2 {
-                                name = "A plan with space in the ID"
-                                type = "Integration"
-                            }
-                        }
                     }
                 }
             }
