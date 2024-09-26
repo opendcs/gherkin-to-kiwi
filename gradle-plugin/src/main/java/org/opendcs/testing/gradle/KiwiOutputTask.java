@@ -5,27 +5,25 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.InvalidUserDataException;
-import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.ListProperty;
-import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.tooling.BuildException;
 import org.opendcs.testing.PlanDefinition;
 import org.opendcs.testing.gherkin.ProcessingError;
 import org.opendcs.testing.kiwi.TestUtils;
 import org.opendcs.testing.rpc.KiwiClient;
 
+/**
+ * Actual task to push to Kiwi instance.
+ */
 public abstract class KiwiOutputTask extends DefaultTask
 {  
     @InputDirectory
@@ -50,6 +48,8 @@ public abstract class KiwiOutputTask extends DefaultTask
     @Input
     ListProperty<PlanDefinition> plans;
 
+    final Map<String,PlanDefinition> planDefs = new HashMap<>();
+
     @TaskAction
     public void storeData()
     {
@@ -69,30 +69,17 @@ public abstract class KiwiOutputTask extends DefaultTask
                 throw new GradleException(err.getMessage());
             }
         };
-        System.err.println("Processing Features");
         Stream<Path> files = featureFiles.getAsFileTree()
             .getFiles().stream()
             .map(File::toPath);
-        
-        if (plans.get().isEmpty())
+        plans.get().forEach(pd ->
         {
-            throw new RuntimeException("No plans have been defined.");
-        }
+            planDefs.put(pd.id, pd);
+        });
         
+        valid_settings();;
         try
         {
-            final Map<String,PlanDefinition> planDefs = new HashMap<>();
-            System.out.println("Plan size" + plans.get().size());
-            plans.get().forEach(pd ->
-            {
-                System.out.println("Creating/Updating plan " + pd.id);
-                planDefs.put(pd.id, pd);
-            });
-            if (!url.isPresent())
-            {
-                //getProject().getLogger().error("Kiwi url is not set.");
-                throw new InvalidUserDataException("Kiwi url is not set.");
-            }
             KiwiClient client = new KiwiClient(url.get(), username.get(), password.get());
             TestUtils.processAndSaveData(client,
                                          product.get(),
@@ -105,6 +92,35 @@ public abstract class KiwiOutputTask extends DefaultTask
         catch (Exception ex)
         {
             throw new RuntimeException("Operations failed.", ex);
+        }
+    }
+
+
+    private void valid_settings()
+    {
+        if (planDefs.isEmpty())
+        {
+            throw new InvalidUserDataException("No plans have been defined. Please define plans");
+        }
+        if (!url.isPresent())
+        {
+            throw new InvalidUserDataException("Kiwi url is not set.");
+        }
+        if (!username.isPresent())
+        {
+            throw new InvalidUserDataException("Kiwi username is not set.");
+        }
+        if (!password.isPresent())
+        {
+            throw new InvalidUserDataException("Kiwi password is not set.");
+        }
+        if (!product.isPresent())
+        {
+            throw new InvalidUserDataException("Product not set or is set to an invalid value.");
+        }
+        if (!version.isPresent())
+        {
+            throw new InvalidUserDataException("Version not set or is set to an invalid value.");
         }
     }
 

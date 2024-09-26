@@ -1,5 +1,4 @@
 package org.opendcs.testing.gradle;
-import javax.xml.ws.spi.Provider;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -37,7 +36,7 @@ public abstract class GherkinKiwiPlugin implements Plugin<Project>
             output.getProduct().convention(kiwi.getProduct());
             final String name = output.getName();
             project.getLogger().info("Processing output {} of type", name);
-            TaskProvider<KiwiOutputTask> pushTask = tasks.register("testOutput"+name, KiwiOutputTask.class, kiwiPush ->
+            TaskProvider<KiwiOutputTask> pushTask = tasks.register(getTaskName("testOutput",name), KiwiOutputTask.class, kiwiPush ->
             {
                 kiwiPush.featureFiles = kiwi.getFeatureFiles();
                 kiwiPush.product = output.getProduct();
@@ -51,5 +50,12 @@ public abstract class GherkinKiwiPlugin implements Plugin<Project>
             });
             outputTask.dependsOn(pushTask);
         });
+    }
+
+    private static String getTaskName(String baseOperation, String name)
+    {
+        String newName = name.substring(0,1).toUpperCase()
+                       + name.substring(1);
+        return baseOperation+newName;
     }
 }
