@@ -22,7 +22,6 @@ public abstract class GherkinKiwiPlugin implements Plugin<Project>
 
         kiwi.getPlans().whenObjectAdded(pd ->
         {
-            System.out.println("Adding " + pd.getName());
             plans.add(
                 project.provider(
                     () -> new PlanDefinition(pd.getName(),
@@ -35,7 +34,6 @@ public abstract class GherkinKiwiPlugin implements Plugin<Project>
             output.getSelectedPlans().convention(project.getObjects().listProperty(String.class));
             output.getProduct().convention(kiwi.getProduct());
             final String name = output.getName();
-            project.getLogger().info("Processing output {} of type", name);
             TaskProvider<KiwiOutputTask> pushTask = tasks.register(getTaskName("testOutput",name), KiwiOutputTask.class, kiwiPush ->
             {
                 kiwiPush.featureFiles = kiwi.getFeatureFiles();

@@ -5,11 +5,12 @@ plugins {
     id 'java-gradle-plugin'
     id 'opendcs-kiwi.java-conventions'
     id 'opendcs-kiwi.deps-conventions'
+    id 'opendcs-kiwi.publishing-conventions'
 }
 
 dependencies {
     compileOnly gradleApi()
-    api project(":lib")
+    implementation project(":lib")
 
     compileOnly gradleApi()
     testRuntimeOnly('org.slf4j:slf4j-simple:2.0.13')
@@ -25,8 +26,33 @@ test {
 gradlePlugin {
     plugins {
         simplePlugin {
-            id = 'org.opendcs.testing.tcms.gherkin-kiwi'
+            id = 'org.opendcs.testing.gradle-gherkin-kiwi'
             implementationClass = 'org.opendcs.testing.gradle.GherkinKiwiPlugin'
+            description = """
+                Takes Gherkin feature files and converts them to a form suitable for
+                uploading to a KiwiTCMS instance.
+            """.stripIndent()
         }
     }
 }
+
+
+signing {
+    sign publishing.publications.maven
+}
+
+/*
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'gradle-gherkin-kiwi'
+            from components.java
+
+            pom {
+                name = 'OpenDCS TCMS Gradle Plugin'
+                description = 'Gradle Plugin to Support TCMS operations'
+            }
+        }
+    }
+}
+*/

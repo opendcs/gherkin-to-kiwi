@@ -18,7 +18,7 @@ public interface GherkinKiwiExtension
 
     /**
      * Gherkin Feature files to process into manual test cases
-     * Default is <projectDir>/src/test/features/*.feature
+     * Default is `$projectDir/src/test/features/*.feature`
      * @return
      */
     @InputDirectory
