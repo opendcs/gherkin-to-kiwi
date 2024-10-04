@@ -22,9 +22,9 @@ task run (type: JavaExec)
     classpath += sourceSets.main.output
     classpath += sourceSets.main.runtimeClasspath
     mainClass = "org.opendcs.testing.gherkin.TestCaseGenerator"
-    args += project.getProperty("kiwi.url");
-    args += project.getProperty("kiwi.user");
-    args += project.getProperty("kiwi.password");
+    args += project.findProperty("kiwi.url") ?: "http://localhost" ;
+    args += project.findProperty("kiwi.user") ?: "test-upload";
+    args += project.findProperty("kiwi.password") ?: "test-password";
 }
 
 jar {

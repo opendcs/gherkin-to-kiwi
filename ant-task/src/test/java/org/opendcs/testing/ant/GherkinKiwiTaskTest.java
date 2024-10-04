@@ -8,7 +8,9 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Disabled;
 
+@Disabled
 public class GherkinKiwiTaskTest
 {    
 
@@ -24,9 +26,9 @@ public class GherkinKiwiTaskTest
         proj.setBaseDir(new File("."));
         ProjectHelper helper = ProjectHelper.getProjectHelper();
         proj.addReference("ant.projectHelper", helper);
-        proj.setUserProperty("kiwi.url", System.getProperty("kiwi.url"));
-        proj.setUserProperty("kiwi.username", System.getProperty("kiwi.user"));
-        proj.setUserProperty("kiwi.password", System.getProperty("kiwi.password"));
+        proj.setUserProperty("kiwi.url", System.getProperty("kiwi.url", "https://localhost:8443"));
+        proj.setUserProperty("kiwi.username", System.getProperty("kiwi.user", "test-upload"));
+        proj.setUserProperty("kiwi.password", System.getProperty("kiwi.password", "test-password"));
         helper.parse(proj, buildFile);
         DefaultLogger logger = new DefaultLogger();
         logger.setOutputPrintStream(System.out);
