@@ -4,6 +4,7 @@ plugins {
     id 'groovy'
     id 'java-gradle-plugin'
     id 'opendcs-kiwi.java-conventions'
+    id 'opendcs-kiwi.quality-conventions'
     id 'opendcs-kiwi.deps-conventions'
     id 'opendcs-kiwi.publishing-conventions'
 }

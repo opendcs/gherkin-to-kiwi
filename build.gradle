@@ -1,10 +1,54 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies { 
+            classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373"
+    }
+}
+
+
 plugins
 {
-    id 'base'
     id 'eclipse'
+    id "com.palantir.git-version" version "3.1.0"
+}
+
+def static versionLabel(gitInfo) {
+    def branch = gitInfo.branchName // all branches are snapshots, only tags get released
+    def tag = gitInfo.lastTag
+    // tag is returned as is. Branch may need cleanup
+    return branch == null ? tag : 99 + "." + branch.replace("/", "-") + "-SNAPSHOT"
 }
 
 allprojects {
     group = 'org.opendcs.testing'
     version = '1.0.0-M11'
+    version = versionLabel(versionDetails())
+}
+
+subprojects {
+    
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "opendcs_testing"
+        property "sonar.organization", "opendcs"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.pullrequest.provider", "GitHub"
+        property "sonar.pullrequest.github.repository", "opendcs/gherkin-to-kiwi"
+        property "sonar.projectVersion", sonarVersion()
+    }
+}
+
+ext.sonarVersion = {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags', '--abbrev=0', "--always"
+        standardOutput = stdout
+    }
+    return stdout.toString().trim() + "+"
 }
