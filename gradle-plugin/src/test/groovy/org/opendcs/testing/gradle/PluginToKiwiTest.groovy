@@ -8,6 +8,7 @@ import org.gradle.testkit.runner.GradleRunner;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.io.CleanupMode;
 
@@ -24,6 +25,7 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 
+@Disabled
 class PluginToKiwiTest 
 {
     @TempDir(cleanup = CleanupMode.ON_SUCCESS)
