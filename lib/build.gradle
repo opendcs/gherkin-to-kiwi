@@ -31,6 +31,7 @@ jar {
     archiveBaseName = "opendcs-tcms-core"
 }
 
+
 signing {
     sign publishing.publications.maven
 }
