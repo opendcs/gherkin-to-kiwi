@@ -7,7 +7,7 @@ ant = "1.10.12"
 junit = "5.10.2"
 slf4j = "2.0.13"
 test-containers = "1.19.7"
-commons-io = "2.11.0"
+commons-io = "2.14.0"
 
 [libraries]
 gherkin = { module = "io.cucumber:gherkin", version.ref="gherkin" }
