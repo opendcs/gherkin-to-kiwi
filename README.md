@@ -1,3 +1,8 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=opendcs_gherkin-to-kiwi&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=opendcs_gherkin-to-kiwi)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=opendcs_rest_api&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=opendcs_rest_api)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=opendcs_gherkin-to-kiwi&metric=coverage)](https://sonarcloud.io/summary/new_code?id=opendcs_gherkin-to-kiwi)
+
+
 # Purpose
 
 This library is intended to be used in build tools to take manual test cases written in the [Gherkin Syntax](https://cucumber.io/docs/gherkin/)
