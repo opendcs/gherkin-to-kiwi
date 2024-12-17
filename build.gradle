@@ -1,8 +1,6 @@
 buildscript {
     repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
+        gradlePluginPortal()
     }
     dependencies { 
             classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373"
@@ -26,8 +24,7 @@ def static versionLabel(gitInfo) {
 
 allprojects {
     group = 'org.opendcs.testing'
-    version = '1.0.0-M11'
-    version = versionLabel(versionDetails())
+    version = project.findProperty("versionOverride") ?: versionLabel(versionDetails())
 }
 
 sonar {

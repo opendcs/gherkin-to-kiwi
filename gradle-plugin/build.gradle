@@ -24,7 +24,7 @@ test {
 gradlePlugin {
     plugins {
         simplePlugin {
-            id = 'org.opendcs.testing.gradle-gherkin-kiwi'
+            id = 'org.opendcs.testing.gradle-plugin'
             implementationClass = 'org.opendcs.testing.gradle.GherkinKiwiPlugin'
             description = """
                 Takes Gherkin feature files and converts them to a form suitable for
@@ -39,23 +39,3 @@ sonarqube {
         property "sonar.tests", "src/test/groovy"
     }
 }
-
-signing {
-    sign publishing.publications.maven
-}
-
-/*
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId = 'gradle-gherkin-kiwi'
-            from components.java
-
-            pom {
-                name = 'OpenDCS TCMS Gradle Plugin'
-                description = 'Gradle Plugin to Support TCMS operations'
-            }
-        }
-    }
-}
-*/

@@ -9,5 +9,5 @@ repositories {
 
 dependencies {
     implementation "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373"
- 
+    implementation 'dev.sigstore:sigstore-gradle-sign-plugin:1.2.0'
 }
