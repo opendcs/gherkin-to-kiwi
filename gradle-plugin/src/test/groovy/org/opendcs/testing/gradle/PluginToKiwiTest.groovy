@@ -8,7 +8,7 @@ import org.gradle.testkit.runner.GradleRunner;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.io.CleanupMode;
 
@@ -25,7 +25,7 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 
-@Disabled
+@EnabledIfSystemProperty(named = "opendcs.test.kiwi_integration", matches = "true")
 class PluginToKiwiTest 
 {
     @TempDir(cleanup = CleanupMode.ON_SUCCESS)
@@ -40,7 +40,7 @@ class PluginToKiwiTest
         buildFile = new File(testProjectDir, "build.gradle");
         buildFile << """
             plugins {
-                id 'org.opendcs.testing.tcms.gherkin-kiwi'
+                id 'org.opendcs.testing.gradle-plugin'
             }
         """
         def resources = new File("src/test/resources")
@@ -75,6 +75,8 @@ class PluginToKiwiTest
                         type = "Acceptance"
                     }
                 }
+
+                featureFiles = project.getLayout().getProjectDirectory().dir("src/test/resources/features")
 
                 outputs {
                     hec {
