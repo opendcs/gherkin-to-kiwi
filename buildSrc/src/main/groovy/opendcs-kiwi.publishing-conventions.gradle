@@ -3,7 +3,6 @@ plugins {
     id 'maven-publish'
 }
 
-
 plugins.apply('dev.sigstore.sign')
 
 sigstoreSign {

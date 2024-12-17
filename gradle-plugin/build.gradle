@@ -21,15 +21,72 @@ test {
     systemProperties += project.properties.findAll { k,v -> k.startsWith("kiwi") }
 }
 
+def projectDescription  = """
+    Takes Gherkin feature files and converts them to a form suitable for
+    uploading to a KiwiTCMS instance.
+""".stripIndent()
+
+def projectName = "OpenDCS TCMS Gradle Plugin"
+
 gradlePlugin {
     plugins {
-        simplePlugin {
+        gradlePlugin {
             id = 'org.opendcs.testing.gradle-plugin'
+            displayName = projectName
             implementationClass = 'org.opendcs.testing.gradle.GherkinKiwiPlugin'
-            description = """
-                Takes Gherkin feature files and converts them to a form suitable for
-                uploading to a KiwiTCMS instance.
-            """.stripIndent()
+            description = projectDescription
+        }
+    }
+}
+/**
+    Due to a quirk of the gradle plugin system, we need to duplicate
+    this information here so it's rendered correctly in the pom for upload
+    to maven central.
+*/
+afterEvaluate {
+    tasks.withType(GenerateMavenPom) { task ->
+        doFirst {
+            // Update POM here
+            def pom = task.pom
+            pom.name = projectName
+
+            pom.description = projectDescription
+            pom.url = 'https://github.com/opendcs/gherkin-to-kiwi'
+
+            pom.scm {
+                connection = 'scm:git:https://github.com/opendcs/gherkin-to-kiwi.git'
+                developerConnection = 'scm:git:ssh://git@github.com:opendcs/gherkin-to-kiwi.git'
+                url = 'https://github.com/opendcs/gherkin-to-kiwi'
+            }
+
+            pom.licenses {
+                license {
+                    name = 'The Apache License, Version 2.0'
+                    url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+            }
+
+            pom.developers {
+                developer {
+                    id = 'opendcs'
+                    name = 'The OpenDCS Team'
+                    email = 'https://github.com/opendcs'
+                }
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'gradle-plugin'
+            from components.java
+
+            pom {
+                name = projectName
+                description = projectDescription
+            }
         }
     }
 }
