@@ -15,7 +15,7 @@ public abstract class GherkinKiwiPlugin implements Plugin<Project>
     {
         GherkinKiwiExtension kiwi = project.getExtensions().create("kiwi", GherkinKiwiExtension.class);
         kiwi.getProduct().convention(project.getName());
-        kiwi.getFeatureFiles().convention(project.getLayout().getProjectDirectory().dir("src/test/resources/features"));
+        kiwi.getFeatureFiles().convention(project.getLayout().getProjectDirectory().dir("src/test/features"));
         final ListProperty<PlanDefinition> plans = project.getObjects().listProperty(PlanDefinition.class);
         final TaskContainer tasks = project.getTasks();
         final Task outputTask = tasks.create("outputTestCases");
