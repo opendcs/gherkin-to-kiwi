@@ -1,13 +1,13 @@
 [versions]
 gherkin = "28.0.0"
-json-rpc2 = "2.1.1"
+json-rpc2 = "2.2"
 okhttp = "4.12.0"
-fasterxml = "2.17.0"
-ant = "1.10.12"
-junit = "5.10.2"
-slf4j = "2.0.13"
-test-containers = "1.19.7"
-commons-io = "2.11.0"
+fasterxml = "2.18.2"
+ant = "1.10.15"
+junit = "5.11.4"
+slf4j = "2.0.16"
+test-containers = "1.20.4"
+commons-io = "2.18.0"
 
 [libraries]
 gherkin = { module = "io.cucumber:gherkin", version.ref="gherkin" }
