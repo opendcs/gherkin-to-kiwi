@@ -9,6 +9,10 @@ on:
     secrets:
       token:
        required: false
+      signingKey:
+        required: true
+      signingKeyPassword:
+        required: true
   workflow_dispatch:
     inputs:
       branch:
@@ -40,4 +44,8 @@ jobs:
       - name: show version
         run: echo ${VERSION}
       - name: Push to central
-        run: ./gradlew publish --info  -PversionOverride=$VERSION
+        run: |
+          ./gradlew publish --info \
+             -PversionOverride=$VERSION \
+             -PsigningKey=${{ secretes.signingKey != null && secretes.signingKey || secrets.SIGNING_KEY }}
+             -PsigningKeyPassword=${{ secretes.signingKeyPassword != null && secretes.signingKeyPassword || secrets.SIGNING_KEY_PASSWORD }}
