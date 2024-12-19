@@ -49,7 +49,7 @@ jobs:
         run: echo ${VERSION}
       - name: Push to central
         run: |
-          ./gradlew publish --info \
+          ./gradlew publish --info -Psign=true \
              -PversionOverride=$VERSION \
              -PsigningKeyPassword=${{ secrets.signingKeyPassword != null && secrets.signingKeyPassword || secrets.SIGNING_KEY_PASSWORD }} \
              -PossrhUsername=${{ secrets.ossrhUsername != null && secrets.ossrhUsername || secrets.OSSRH_USERNAME }} \
