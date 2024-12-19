@@ -51,7 +51,7 @@ jobs:
         run: |
           ./gradlew publish --info -Psign=true \
              -PversionOverride=$VERSION \
-             -PsigningKeyPassword=${{ secrets.signingKeyPassword != null && secrets.signingKeyPassword || secrets.SIGNING_KEY_PASSWORD }} \
+             -PsigningKeyPassword="${{ secrets.signingKeyPassword != null && secrets.signingKeyPassword || secrets.SIGNING_KEY_PASSWORD }}" \
              -PossrhUsername=${{ secrets.ossrhUsername != null && secrets.ossrhUsername || secrets.OSSRH_USERNAME }} \
              -PossrhPassword=${{ secrets.ossrhPassword != null && secrets.ossrhPassword || secrets.OSSRH_PASSWORD }} \
-             -PsigningKey=${{ secrets.signingKey != null && secrets.signingKey || secrets.SIGNING_KEY }}
+             -PsigningKey="${{ secrets.signingKey != null && secrets.signingKey || secrets.SIGNING_KEY }}"
