@@ -3,7 +3,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies { 
-            classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373"
+            classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:6.0.1.5171"
     }
 }
 
