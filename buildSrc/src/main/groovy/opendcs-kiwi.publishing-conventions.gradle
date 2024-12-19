@@ -1,24 +1,35 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'signing'
 }
 
-plugins.apply('dev.sigstore.sign')
+ext.shouldSign = (project.findProperty("sign") ?: "false") == "true"
 
-sigstoreSign {
-    oidcClient {
-        gitHub {
-            audience.set("sigstore")
-        }
+if (shouldSign) {
+    plugins.apply('dev.sigstore.sign')
 
-        web {
-            clientId.set("sigstore")
-            issuer.set("https://oauth2.sigstore.dev/auth")
+    sigstoreSign {
+        oidcClient {
+            gitHub {
+                audience.set("sigstore")
+            }
+
+            web {
+                clientId.set("sigstore")
+                issuer.set("https://oauth2.sigstore.dev/auth")
+            }
+            // By default, gitHub client is used if ACTIONS_ID_TOKEN_REQUEST_URL environment variable exists
+            // This setting would enforce web OIDC client
+            client.set(web)
         }
-        // By default, gitHub client is used if ACTIONS_ID_TOKEN_REQUEST_URL environment variable exists
-        // This setting would enforce web OIDC client
-        client.set(web)
     }
+
+    signing {
+        def signingKey = project.getProperty("signingKey").trim().replace("\n","")
+        def signingPassword = project.getProperty("signingKeyPassword")
+        useInMemoryPgpKeys(signingKey, signingPassword)
+}
 }
 
 publishing {

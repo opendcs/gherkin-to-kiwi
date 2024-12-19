@@ -15,6 +15,12 @@ test {
     systemProperties += project.properties.findAll { k,v -> k.startsWith("kiwi") }
 }
 
+if (shouldSign) {
+    signing {
+        sign publishing.publications.maven
+    }
+}
+
 publishing {
     publications {
         maven(MavenPublication) {

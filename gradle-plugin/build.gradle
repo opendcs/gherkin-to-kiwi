@@ -1,5 +1,3 @@
-
-
 plugins {
     id 'groovy'
     id 'java-gradle-plugin'
@@ -7,6 +5,7 @@ plugins {
     id 'opendcs-kiwi.quality-conventions'
     id 'opendcs-kiwi.deps-conventions'
     id 'opendcs-kiwi.publishing-conventions'
+    id 'com.gradle.plugin-publish' version '1.2.1'
 }
 
 dependencies {
@@ -28,7 +27,15 @@ def projectDescription  = """
 
 def projectName = "OpenDCS TCMS Gradle Plugin"
 
+if (shouldSign) {
+    signing {
+        sign publishing.publications.maven
+    }
+}
+
 gradlePlugin {
+    website = 'https://github.com/opendcs/gherkin-to-kiwi'
+    vcsUrl = 'https://github.com/opendcs/gherkin-to-kiwi'
     plugins {
         gradlePlugin {
             id = 'org.opendcs.testing.gradle-plugin'
@@ -38,54 +45,31 @@ gradlePlugin {
         }
     }
 }
-/**
-    Due to a quirk of the gradle plugin system, we need to duplicate
-    this information here so it's rendered correctly in the pom for upload
-    to maven central.
-*/
-afterEvaluate {
-    tasks.withType(GenerateMavenPom) { task ->
-        doFirst {
-            // Update POM here
-            def pom = task.pom
-            pom.name = projectName
 
-            pom.description = projectDescription
-            pom.url = 'https://github.com/opendcs/gherkin-to-kiwi'
+publishing.publications.withType(MavenPublication) {
+    pom {
+        name = projectName
+        description = projectDescription
+        url = 'https://github.com/opendcs/gherkin-to-kiwi'
 
-            pom.scm {
-                connection = 'scm:git:https://github.com/opendcs/gherkin-to-kiwi.git'
-                developerConnection = 'scm:git:ssh://git@github.com:opendcs/gherkin-to-kiwi.git'
-                url = 'https://github.com/opendcs/gherkin-to-kiwi'
-            }
+        scm {
+            connection = 'scm:git:https://github.com/opendcs/gherkin-to-kiwi.git'
+            developerConnection = 'scm:git:ssh://git@github.com:opendcs/gherkin-to-kiwi.git'
+            url = 'https://github.com/opendcs/gherkin-to-kiwi'
+        }
 
-            pom.licenses {
-                license {
-                    name = 'The Apache License, Version 2.0'
-                    url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                }
-            }
-
-            pom.developers {
-                developer {
-                    id = 'opendcs'
-                    name = 'The OpenDCS Team'
-                    email = 'https://github.com/opendcs'
-                }
+        licenses {
+            license {
+                name = 'The Apache License, Version 2.0'
+                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
             }
         }
-    }
-}
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId = 'gradle-plugin'
-            from components.java
-
-            pom {
-                name = projectName
-                description = projectDescription
+        developers {
+            developer {
+                id = 'opendcs'
+                name = 'The OpenDCS Team'
+                email = 'https://github.com/opendcs'
             }
         }
     }
