@@ -394,7 +394,28 @@ public class TestCase
         {
             return Collections.unmodifiableList(tags);
         }
+
+        public String getProduct()
+        {
+            return this.product.name;
+        }
+
+        public String getPriority()
+        {
+            return this.priority.name;
+        }
+
+        public String getProperty(String property)
+        {
+            return this.properties.getProperty(property);
+        }
+
+        public String getSummary()
+        {
+            return this.summary;
+        }
     }
+
 
     /**
      * Wrapper class to hold property values.

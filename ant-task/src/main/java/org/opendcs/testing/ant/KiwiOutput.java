@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -13,6 +14,7 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 import org.opendcs.testing.PlanDefinition;
 import org.opendcs.testing.gherkin.ProcessingError;
+import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.kiwi.TestUtils;
 import org.opendcs.testing.rpc.KiwiClient;
 
@@ -88,6 +90,11 @@ public class KiwiOutput extends TestOutput
                     throw new BuildException(err.getMessage());
                 }
             };
+            UnaryOperator<TestCase.Builder> applyMarker = tcb ->
+            {
+                tcb.withProperty("marker", String.format("manual-%s-%s", tcb.getProduct(), tcb.getSummary()));
+                return tcb;
+            };
             project.log(this, "Processing and Saving Test Sets.", Project.MSG_VERBOSE);
             TestUtils.processAndSaveData(client,
                     productName,
@@ -95,7 +102,8 @@ public class KiwiOutput extends TestOutput
                     files.stream().map(r -> new File(r.getName()).toPath()),
                     planDefinitions,
                     obj -> project.log(this, obj.toString(), Project.MSG_VERBOSE),
-                    onError);
+                    onError,
+                    applyMarker);
         }
         catch (IOException ex)
         {

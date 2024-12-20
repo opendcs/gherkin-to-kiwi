@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import org.gradle.api.DefaultTask;
@@ -18,6 +19,7 @@ import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.TaskAction;
 import org.opendcs.testing.PlanDefinition;
 import org.opendcs.testing.gherkin.ProcessingError;
+import org.opendcs.testing.kiwi.TestCase;
 import org.opendcs.testing.kiwi.TestUtils;
 import org.opendcs.testing.rpc.KiwiClient;
 
@@ -69,6 +71,11 @@ public abstract class KiwiOutputTask extends DefaultTask
                 throw new GradleException(err.getMessage());
             }
         };
+        UnaryOperator<TestCase.Builder> applyMarker = tcb ->
+        {
+            tcb.withProperty("marker", String.format("manual-%s-%s", tcb.getProduct(), tcb.getSummary()));
+            return tcb;
+        };
         Stream<Path> files = featureFiles.getAsFileTree()
             .getFiles().stream()
             .map(File::toPath);
@@ -87,7 +94,8 @@ public abstract class KiwiOutputTask extends DefaultTask
                                          files,
                                          planDefs,
                                          obj -> getProject().getLogger().debug(obj.toString()),
-                                         onError);
+                                         onError,
+                                         applyMarker);
         }
         catch (Exception ex)
         {

@@ -45,10 +45,10 @@ public class TestCaseGenerator
                 .build();
     }
 
-    public Stream<FailableResult<TestCase, ProcessingError>> generateCases(Path path)
+    public Stream<FailableResult<TestCase.Builder, ProcessingError>> generateCases(Path path)
     {
         final AtomicReference<String> currentFeature = new AtomicReference<>();
-        Predicate<FailableResult<TestCase, ParseError>> excludeNull = r -> r != null;
+        Predicate<FailableResult<TestCase.Builder, ParseError>> excludeNull = r -> r != null;
         try
         {
             return parser.parse(path)
@@ -73,13 +73,13 @@ public class TestCaseGenerator
         }
     }
 
-    public Stream<FailableResult<TestCase, ProcessingError>> generateCases(List<Path> paths) throws IOException
+    public Stream<FailableResult<TestCase.Builder, ProcessingError>> generateCases(List<Path> paths) throws IOException
     {
         return paths.stream()
                 .flatMap(p -> generateCases(p));
     }
 
-    private static FailableResult<TestCase, ParseError> createOrSetError(Envelope e,
+    private static FailableResult<TestCase.Builder, ParseError> createOrSetError(Envelope e,
             AtomicReference<String> currentFeature, String product)
     {
         if (e.getParseError().isPresent())
@@ -106,7 +106,7 @@ public class TestCaseGenerator
         return null;
     }
 
-    private static TestCase fromPickle(Pickle p, AtomicReference<String> currentFeature, String product)
+    private static TestCase.Builder fromPickle(Pickle p, AtomicReference<String> currentFeature, String product)
     {
         final TestCase.Builder testBuilder = new TestCase.Builder(product);
         testBuilder.withSummary(p.getName());
@@ -139,7 +139,7 @@ public class TestCaseGenerator
                 testBuilder.withPriority(((PriorityTag)t).priorityName);
             }
         });
-        return testBuilder.build();
+        return testBuilder;
     }
 
     public static void main(String args[]) throws Exception
@@ -159,6 +159,7 @@ public class TestCaseGenerator
                 }))
                 .filter(ftc -> ftc.isSuccess())
                 .map(ftc -> ftc.getSuccess())
+                .map(TestCase.Builder::build)
                 .peek(System.out::println)
                 .collect(Collectors.toList());
 

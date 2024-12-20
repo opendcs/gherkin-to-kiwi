@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import org.opendcs.testing.PlanDefinition;
@@ -169,7 +170,7 @@ public class TestUtils
      */
     public static void processAndSaveData(KiwiClient client, String productName, String version,
             Stream<Path> files, Map<String, PlanDefinition> planDefinitions,
-            Consumer<Object> logger, Consumer<ProcessingError> onError)
+            Consumer<Object> logger, Consumer<ProcessingError> onError, UnaryOperator<TestCase.Builder> beforeBuild)
             throws IOException
     {
         final TestCaseGenerator tcg = new TestCaseGenerator(productName);
@@ -180,7 +181,9 @@ public class TestUtils
             return tcg.generateCases(path)
                     .peek(fr -> fr.handleError(onError))
                     .filter(fr -> fr.isSuccess())
-                    .map(fr -> fr.getSuccess());
+                    .map(fr -> fr.getSuccess())
+                    .map(tc -> beforeBuild.apply(tc))
+                    .map(TestCase.Builder::build);
         };
         Stream<TestCase> cases = files
                 .flatMap(mapCases)
