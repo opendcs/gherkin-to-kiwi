@@ -18,6 +18,7 @@ dependencies {
 
 test {
     systemProperties += project.properties.findAll { k,v -> k.startsWith("kiwi") }
+    systemProperties += project.properties.findAll { k,v -> k.startsWith("opendcs") }
 }
 
 def projectDescription  = """

@@ -38,7 +38,7 @@ class PluginTest
         buildFile = new File(testProjectDir, "build.gradle");
         buildFile << """
             plugins {
-                id 'org.opendcs.testing.tcms.gherkin-kiwi'
+                id 'org.opendcs.testing.gradle-plugin'
             }
         """
         def resources = new File("src/test/resources")
@@ -74,6 +74,8 @@ class PluginTest
                     }
                 }
 
+                featureFiles = project.getLayout().getProjectDirectory().dir("src/test/resources/features")
+
                 outputs {
                     hec {
                         type = "kiwi"
@@ -90,6 +92,7 @@ class PluginTest
                                  .withProjectDir(testProjectDir)
                                  .withArguments("outputTestCases","--info")
                                  .withPluginClasspath()
+                                 .withDebug(true)
                                  .buildAndFail()
         //assertTrue(result.output.contains("Kiwi url is not set."))
     }

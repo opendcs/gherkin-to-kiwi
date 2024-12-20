@@ -45,7 +45,6 @@ class PluginToKiwiTest
         """
         def resources = new File("src/test/resources")
         FileUtils.copyDirectory(resources, new File(testProjectDir, "src/test/resources"))
-        
     }
 
     @Test
@@ -98,6 +97,7 @@ class PluginToKiwiTest
                                                 "-Pkiwi.password=" + System.getProperty("kiwi.password"),
                                                 "-Pkiwi.url=" + System.getProperty("kiwi.url"),
                                                 "--stacktrace")
+                                 .withDebug(true)
                                  .withPluginClasspath()
                                  .build()
 
