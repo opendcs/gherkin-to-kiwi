@@ -1,5 +1,6 @@
 @Kiwi.Plan(Plan1)
 @Kiwi.Plan(Plan2)
+@Kiwi.Priority(P1)
 Feature: Test 1
 
     Background: Basic Setup

@@ -1,4 +1,5 @@
 @Kiwi.Plan(CheckDecodesPlatformList)
+@Kiwi.Priority(P2)
 Feature: Platform List Tab
 
     Background: Basic Setup

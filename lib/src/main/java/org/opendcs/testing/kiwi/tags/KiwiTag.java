@@ -7,11 +7,19 @@ public interface KiwiTag
     {
         if (tag.startsWith("@Kiwi.Plan"))
         {
-            int idxOfOpenParen = tag.indexOf("(");
-            int idxOfCloseParen = tag.indexOf(")");
-            String args[] = tag.substring(idxOfOpenParen + 1, idxOfCloseParen).split(",");
-            return new PlanTag(args);
+            return new PlanTag(getArgs(tag));
+        }
+        else if (tag.startsWith("@Kiwi.Priority"))
+        {
+            return new PriorityTag(getArgs(tag));
         }
         return null;
+    }
+
+    public static String[] getArgs(String tag)
+    {
+        int idxOfOpenParen = tag.indexOf("(");
+        int idxOfCloseParen = tag.indexOf(")");
+        return tag.substring(idxOfOpenParen + 1, idxOfCloseParen).split(",");
     }
 }

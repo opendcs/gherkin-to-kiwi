@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.opendcs.testing.PlanDefinition;
 import org.opendcs.testing.kiwi.TestCase;
+import org.opendcs.testing.kiwi.tags.PriorityTag;
 import org.opendcs.testing.util.FailableResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,6 +113,7 @@ public class TestCaseGenerator
         testBuilder.withComponent(currentFeature.get());
         testBuilder.withPriority("P3"); // TODO: allow a config file/tag/etc to establish default
         p.getTags().forEach(t -> testBuilder.withTag(t.getName()));
+
         StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);
         for (PickleStep s : p.getSteps())
@@ -130,6 +132,13 @@ public class TestCaseGenerator
         // TODO: probably need to be able to tweak the URI to something sensible like the project URL vs the local
         // FileSystem. Or just Strip to not include the host.
         testBuilder.withProperty("marker", String.format("%s-%s", p.getUri(), p.getName()));
+        TestPlanGenerator.processTags(testBuilder.getTags()).forEach(t ->
+        {
+            if (t instanceof PriorityTag)
+            {
+                testBuilder.withPriority(((PriorityTag)t).priorityName);
+            }
+        });
         return testBuilder.build();
     }
 

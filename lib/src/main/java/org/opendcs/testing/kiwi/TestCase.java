@@ -389,6 +389,11 @@ public class TestCase
         {
             return id;
         }
+
+        public List<String> getTags()
+        {
+            return Collections.unmodifiableList(tags);
+        }
     }
 
     /**
