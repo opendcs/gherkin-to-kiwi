@@ -1,5 +1,5 @@
 [versions]
-gherkin = "30.0.4"
+gherkin = "31.0.0"
 json-rpc2 = "2.2"
 okhttp = "4.12.0"
 fasterxml = "2.18.2"
