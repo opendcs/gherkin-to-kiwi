@@ -6,7 +6,7 @@ fasterxml = "2.18.2"
 ant = "1.10.15"
 junit = "5.11.4"
 slf4j = "2.0.16"
-test-containers = "1.20.4"
+test-containers = "1.20.5"
 commons-io = "2.18.0"
 
 [libraries]
