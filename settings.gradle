@@ -17,6 +17,8 @@ include 'services:webservice'
 
 rootProject.name = 'gherkin-to-kiwi'
 include 'lib'
+project(":lib").name = "opendcs-tcms-core"
 include 'ant-task'
+project(":ant-task").name = "opendcs-tcms-ant-task"
 include 'gradle-plugin'
 include 'test-fixtures'

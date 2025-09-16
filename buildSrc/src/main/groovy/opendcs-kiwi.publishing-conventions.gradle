@@ -2,12 +2,26 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'signing'
+    id 'io.github.opendcs.maven.maven-central-upload'
 }
+
+def static versionLabel(gitInfo) {
+    def branch = gitInfo.branchName // all branches are snapshots, only tags get released
+    def tag = gitInfo.lastTag
+    // tag is returned as is. Branch may need cleanup
+    return branch == null ? tag : 99 + "." + branch.replace("/", "-") + "-SNAPSHOT"
+}
+
+def tmp_version = project.findProperty("versionOverride") ?: versionLabel(versionDetails())
+
+group = 'org.opendcs.testing'
+version = tmp_version
+
 
 ext.shouldSign = (project.findProperty("sign") ?: "false") == "true"
 
 if (shouldSign) {
-    plugins.apply('dev.sigstore.sign')
+    /*plugins.apply('dev.sigstore.sign')
 
     sigstoreSign {
         oidcClient {
@@ -20,7 +34,7 @@ if (shouldSign) {
                 issuer.set("https://oauth2.sigstore.dev/auth")
             }
         }
-    }
+    }*/
 
     signing {
         def signingKey = project.getProperty("signingKey").trim().replace("\n","")
@@ -29,9 +43,7 @@ if (shouldSign) {
 }
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
+publishing.publications.withType(MavenPublication) {
             pom {
                 url = 'https://github.com/opendcs/gherkin-to-kiwi'
 
@@ -57,16 +69,14 @@ publishing {
                 }
             }
         }
-    }
 
+publishing {
     repositories {
         maven {
-            def releaseUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            def user = project.findProperty("ossrhUsername")
-            def passwd = project.findProperty("ossrhPassword")
-            name = 'MavenCentral'
-            url = version.endsWith('SNAPSHOT') ? snapshotUrl : releaseUrl
+            name = "mavenCentralApi"
+            url = "https://central.sonatype.com"
+            def user = project.findProperty("centralApiUsername")
+            def passwd = project.findProperty("centralApiPassword")
             credentials {
                 username = user
                 password = passwd

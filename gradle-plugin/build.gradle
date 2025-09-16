@@ -10,7 +10,7 @@ plugins {
 
 dependencies {
     compileOnly gradleApi()
-    implementation project(":lib")
+    implementation project(":opendcs-tcms-core")
 
     compileOnly gradleApi()
     testImplementation gradleTestKit()
@@ -30,7 +30,7 @@ def projectName = "OpenDCS TCMS Gradle Plugin"
 
 if (shouldSign) {
     signing {
-        sign publishing.publications.maven
+        sign publishing.publications
     }
 }
 
