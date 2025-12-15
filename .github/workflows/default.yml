@@ -35,7 +35,7 @@ jobs:
         run: ./gradlew build
       - name: Upload Coverage
         if: matrix.platform == 'ubuntu-latest' && matrix.jdk == 17
-        uses: actions/upload-artifact@v5.0.0
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: coverage
           path: ./**/build/**/jacoco*.xml
