@@ -3,7 +3,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies { 
-            classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:7.0.1.6134"
+            classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:7.2.1.6560"
     }
 }
 
@@ -11,7 +11,7 @@ buildscript {
 plugins
 {
     id 'eclipse'
-    id "com.palantir.git-version" version "4.1.0"
+    id "com.palantir.git-version" version "4.2.0"
     id 'org.sonarqube'
 }
 
