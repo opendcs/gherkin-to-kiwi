@@ -18,11 +18,10 @@ import javax.net.ssl.X509TrustManager;
 import org.opendcs.testing.util.ThrowingFunction;
 import org.opendcs.testing.util.ThrowingSupplier;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import okhttp3.Cache;
 import okhttp3.Cookie;
@@ -206,11 +205,10 @@ public final class KiwiClient
      */
     private void login(String user, String password) throws IOException
     {
-        JSONRPC2Request rpcRequest = new JSONRPC2Request("Auth.login", 0);
         Map<String, Object> params = new HashMap<>();
         params.put("username", user);
         params.put("password", password);
-        rpcRequest.setNamedParams(params);
+        ObjectNode rpcRequest = createRequest("Auth.login", 0, null, params);
         rpcRequest(rpcRequest);
     }
 
@@ -219,11 +217,11 @@ public final class KiwiClient
      *
      * @param request
      *            prefilled request.
-     * @return a valid JSONRPC2Response object
+     * @return the JSON-RPC 2.0 "result" node from the response
      * @throws IOException
-     *             If there is an error with the HTTP request, or the JSONRPC2Response returns a failure.
+     *             If there is an error with the HTTP request, or the response contains an error.
      */
-    JSONRPC2Response rpcRequest(JSONRPC2Request request) throws IOException
+    JsonNode rpcRequest(ObjectNode request) throws IOException
     {
         Request httpRequest = new Request.Builder()
                 .url(baseUrl)
@@ -235,85 +233,67 @@ public final class KiwiClient
             throw new IOException("HTTP Call failed with error " + httpResponse.code());
         }
         String body = httpResponse.body().string();
-        JSONRPC2Response rpcResponse;
+        JsonNode rpcResponse;
         try
         {
-            rpcResponse = JSONRPC2Response.parse(body);
-            if (rpcResponse.getError() != null)
-            {
-                throw new IOException("RPC call failed", rpcResponse.getError());
-            }
-            return rpcResponse;
+            rpcResponse = jsonMapper.readTree(body);
         }
-        catch (JSONRPC2ParseException ex)
+        catch (JsonProcessingException ex)
         {
             throw new IOException("Invalid response from server", ex);
         }
-    }
-
-    /**
-     * Creates a JSONRPC2Request with a random ID.
-     *
-     * @param method
-     *            The JSON RPC method name.
-     * @return
-     */
-    JSONRPC2Request createRequest(String method)
-    {
-        return new JSONRPC2Request(method, UUID.randomUUID().toString());
-    }
-
-    /**
-     * Creates a JSONRPC2Request with a random ID and the given positional parameters.
-     *
-     * @param method
-     *            The JSON RPC method name
-     * @param positionalParams
-     *            Positional parameters for the method
-     * @return
-     */
-    JSONRPC2Request createRequest(String method, List<Object> positionalParams)
-    {
-        return createRequest(method, positionalParams, null);
-    }
-
-    /**
-     * Creates a JSONRPC2Request with a random ID and given named parameters.
-     *
-     * @param method
-     *            The JSON RPC method name.
-     * @param namedParams
-     *            named parameters for the method.
-     * @return
-     */
-    JSONRPC2Request createRequest(String method, Map<String, Object> namedParams)
-    {
-        return createRequest(method, null, namedParams);
-    }
-
-    /**
-     * Creates a JSONRPC2Request with a random ID and given named and positional parameters
-     *
-     * @param method
-     *            The JSON RPC method name.
-     * @param positionalParams
-     *            The required positional parameters for the method.
-     * @param namedParams
-     *            THe required named parameters for the method.
-     * @return
-     */
-    JSONRPC2Request createRequest(String method, List<Object> positionalParams, Map<String, Object> namedParams)
-    {
-        JSONRPC2Request rpcReq = createRequest(method);
-        if (positionalParams != null)
+        JsonNode error = rpcResponse.get("error");
+        if (error != null && !error.isNull())
         {
-            rpcReq.setPositionalParams(positionalParams);
+            throw new IOException("RPC call failed: " + error.toString());
+        }
+        return rpcResponse.get("result");
+    }
+
+    ObjectNode createRequest(String method)
+    {
+        return createRequest(method, UUID.randomUUID().toString(), null, null);
+    }
+
+    ObjectNode createRequest(String method, List<Object> positionalParams)
+    {
+        return createRequest(method, UUID.randomUUID().toString(), positionalParams, null);
+    }
+
+    ObjectNode createRequest(String method, Map<String, Object> namedParams)
+    {
+        return createRequest(method, UUID.randomUUID().toString(), null, namedParams);
+    }
+
+    ObjectNode createRequest(String method, List<Object> positionalParams, Map<String, Object> namedParams)
+    {
+        return createRequest(method, UUID.randomUUID().toString(), positionalParams, namedParams);
+    }
+
+    private ObjectNode createRequest(String method, Object id,
+                                     List<Object> positionalParams,
+                                     Map<String, Object> namedParams)
+    {
+        ObjectNode req = jsonMapper.createObjectNode();
+        req.put("jsonrpc", "2.0");
+        req.put("method", method);
+        if (id instanceof Number)
+        {
+            req.put("id", ((Number) id).longValue());
+        }
+        else
+        {
+            req.put("id", id.toString());
         }
         if (namedParams != null)
         {
-            rpcReq.setNamedParams(namedParams);
+            req.set("params", jsonMapper.valueToTree(namedParams));
         }
-        return rpcReq;
+        else if (positionalParams != null)
+        {
+            req.set("params", jsonMapper.valueToTree(positionalParams));
+        }
+        return req;
     }
 
     /**
@@ -337,10 +317,8 @@ public final class KiwiClient
     {
         List<Object> positional = Arrays.asList(positionalArgs);
         Map<String, Object> named = supplyNamed != null ? supplyNamed.get() : null;
-        JSONRPC2Request rpcReq = createRequest(method, positional, named);
-        JSONRPC2Response response = rpcRequest(rpcReq);
-        String jsonString = response.getResult().toString();
-        JsonNode node = jsonMapper.readTree(jsonString);
+        ObjectNode rpcReq = createRequest(method, positional, named);
+        JsonNode node = rpcRequest(rpcReq);
         try
         {
             return mapResult.apply(node);
@@ -377,10 +355,8 @@ public final class KiwiClient
             throws IOException
     {
         List<R> items = new ArrayList<>();
-        JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(query));
-        JSONRPC2Response response = rpcRequest(rpcReq);
-        String jsonString = response.getResult().toString();
-        JsonNode node = jsonMapper.readTree(jsonString);
+        ObjectNode rpcReq = createRequest(method, Arrays.asList(query));
+        JsonNode node = rpcRequest(rpcReq);
         for (JsonNode e : node)
         {
             try
@@ -437,9 +413,8 @@ public final class KiwiClient
             positional.add(arg);
         }
         Map<String, Object> named = supplyNamed != null ? supplyNamed.get() : null;
-        JSONRPC2Request rpcReq = createRequest(method, positional, named);
-        JSONRPC2Response response = rpcRequest(rpcReq);
-        JsonNode node = jsonMapper.readTree(response.getResult().toString());
+        ObjectNode rpcReq = createRequest(method, positional, named);
+        JsonNode node = rpcRequest(rpcReq);
         try
         {
             return mapResult.apply(node);
@@ -468,13 +443,13 @@ public final class KiwiClient
      */
     public void remove(String method, Map<String, String> query) throws IOException
     {
-        JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(query));
+        ObjectNode rpcReq = createRequest(method, Arrays.asList(query));
         rpcRequest(rpcReq);
     }
 
     public void remove(String method, Object... args) throws IOException
     {
-        JSONRPC2Request rpcReq = createRequest(method, Arrays.asList(args));
+        ObjectNode rpcReq = createRequest(method, Arrays.asList(args));
         rpcRequest(rpcReq);
     }
 }
