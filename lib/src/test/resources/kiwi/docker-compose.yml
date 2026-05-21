@@ -1,0 +1,33 @@
+services:
+  db:
+    image: mariadb:latest
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-ukiwi", "-pkiwi"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    environment:
+      MYSQL_ROOT_PASSWORD: kiwi-1s-aw3s0m3
+      MYSQL_DATABASE: kiwi
+      MYSQL_USER: kiwi
+      MYSQL_PASSWORD: kiwi
+
+  web:
+    depends_on:
+      db:
+        condition: service_healthy
+    image: pub.kiwitcms.eu/kiwitcms/kiwi:latest
+    ports:
+      - "8443"
+    volumes:
+      - uploads:/Kiwi/uploads
+    environment:
+      KIWI_DB_HOST: db
+      KIWI_DB_PORT: 3306
+      KIWI_DB_NAME: kiwi
+      KIWI_DB_USER: kiwi
+      KIWI_DB_PASSWORD: kiwi
+
+volumes:
+  uploads:

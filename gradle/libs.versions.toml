@@ -5,7 +5,7 @@ fasterxml = "2.20.0"
 ant = "1.10.15"
 junit = "5.11.4"
 slf4j = "2.0.17"
-test-containers = "1.21.3"
+test-containers = "2.0.2"
 commons-io = "2.20.0"
 
 [libraries]
@@ -24,7 +24,7 @@ junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", vers
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
 
 test-containers = { module = "org.testcontainers:testcontainers", version.ref = "test-containers" }
-test-containers-jupiter = { module ="org.testcontainers:junit-jupiter", version.ref = "test-containers" }
+test-containers-jupiter = { module ="org.testcontainers:testcontainers-junit-jupiter", version.ref = "test-containers" }
 
 [bundles]
 fasterxml-json = ["fasterxml-jackson-core", "fasterxml-jackson-databind"]

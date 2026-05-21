@@ -12,6 +12,12 @@ dependencies
     implementation(libs.okhttp)
     implementation(libs.slf4j)
     implementation(libs.bundles.fasterxml.json)
+
+    testImplementation(project(":test-fixtures"))
+}
+
+test {
+    systemProperties += project.properties.findAll { k,v -> k.startsWith("opendcs") }
 }
 
 
