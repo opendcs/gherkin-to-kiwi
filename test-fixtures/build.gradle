@@ -5,6 +5,6 @@ plugins
 }
 
 dependencies {
-    implementation(libs.bundles.test.containers)
-    implementation(libs.bundles.junit)
+    api(libs.bundles.test.containers)
+    api(libs.bundles.junit)
 }

@@ -9,10 +9,15 @@ plugins
 dependencies 
 {
     implementation(libs.gherkin)
-    implementation(libs.json.rpc2)
     implementation(libs.okhttp)
     implementation(libs.slf4j)
     implementation(libs.bundles.fasterxml.json)
+
+    testImplementation(project(":test-fixtures"))
+}
+
+test {
+    systemProperties += project.properties.findAll { k,v -> k.startsWith("opendcs") }
 }
 
 
