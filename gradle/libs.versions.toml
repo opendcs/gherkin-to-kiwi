@@ -1,7 +1,7 @@
 [versions]
 gherkin = "36.0.0"
 okhttp = "5.3.0"
-fasterxml = "2.20.0"
+fasterxml = "2.22.1"
 ant = "1.10.15"
 junit = "5.11.4"
 slf4j = "2.0.17"
