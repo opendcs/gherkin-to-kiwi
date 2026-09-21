@@ -11,7 +11,7 @@ buildscript {
 plugins
 {
     id 'eclipse'
-    id "com.palantir.git-version" version "4.1.0"
+    id "com.palantir.git-version" version "5.0.0"
     id 'org.sonarqube'
 }
 
